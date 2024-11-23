@@ -9,38 +9,60 @@ import FirebaseFirestore
 import FirebaseAuth
 
 class AuthHelper {
-    // Firestore database instance
     private let db = Firestore.firestore()
-    // Reference to the "users" collection in Firestore
     private let users_db: FirebaseFirestore.CollectionReference
-    // The currently logged-in user's UID, stored locally
     private var user_id: String
     
-    // Initializer to set up the Firestore collection and retrieve the user ID from UserDefaults
     init() {
-        self.user_id = UserDefaults.standard.string(forKey: "uid") ?? "" // Retrieve UID if it exists
-        self.users_db = db.collection("users") // Reference to "users" Firestore collection
+        self.user_id = UserDefaults.standard.string(forKey: "uid") ?? ""
+        self.users_db = db.collection("users")
+    }
+
+    // Reset password function
+    func reset_password(email: String, completion: @escaping (Result<Void, Error>) -> Void) {
+        Auth.auth().sendPasswordReset(withEmail: email) { error in
+            if let error = error {
+                completion(.failure(error))
+                return
+            }
+            // Notify the caller of success
+            completion(.success(()))
+        }
+    }
+
+    // Send email verification
+    func send_email_verification(completion: @escaping (Result<Void, Error>) -> Void) {
+        guard let currentUser = Auth.auth().currentUser else {
+            let error = NSError(domain: "", code: -1, userInfo: [NSLocalizedDescriptionKey: "No user is logged in."])
+            completion(.failure(error))
+            return
+        }
+        
+        // Check if email is already verified
+        if currentUser.isEmailVerified {
+            completion(.success(()))
+        } else {
+            // Send verification email
+            currentUser.sendEmailVerification { error in
+                if let error = error {
+                    completion(.failure(error))
+                    return
+                }
+                // Notify the caller of success
+                completion(.success(()))
+            }
+        }
     }
     
-    /**
-     Logs in a user with the provided email and password.
-     
-     - Parameters:
-        - email: The user's email address.
-        - password: The user's password.
-        - completion: A closure that returns a `Result` indicating success or failure.
-     */
+    // Login function
     func login_user(email: String, password: String, completion: @escaping (Result<Void, Error>) -> Void) {
         Auth.auth().signIn(withEmail: email, password: password) { authResult, error in
-            // Handle errors during login
             if let error = error as NSError? {
                 let userError: NSError
                 
-                // Check if the error is network-related
                 if error.code == NSURLErrorNotConnectedToInternet || error.code == NSURLErrorTimedOut {
                     userError = NSError(domain: "", code: error.code, userInfo: [NSLocalizedDescriptionKey: "Network error. Please check your connection and try again."])
                 } else {
-                    // General error for invalid username or password
                     userError = NSError(domain: "", code: error.code, userInfo: [NSLocalizedDescriptionKey: "Invalid username or password. Please try again."])
                 }
                 
@@ -48,109 +70,73 @@ class AuthHelper {
                 return
             }
             
-            // Ensure we have a valid user object
             guard let user = authResult?.user else {
                 let retrievalError = NSError(domain: "", code: -1, userInfo: [NSLocalizedDescriptionKey: "Failed to retrieve user. Please try again."])
                 completion(.failure(retrievalError))
                 return
             }
             
-            // Save user ID to UserDefaults for future sessions
             UserDefaults.standard.set(user.uid, forKey: "uid")
-            completion(.success(())) // Notify the caller of success
+            completion(.success(()))
         }
     }
 
-
-
-    
-    /**
-     Logs out the current user by signing them out and clearing their stored UID.
-     
-     - Parameters:
-        - completion: A closure that returns a `Result` indicating success or failure.
-     */
+    // Logout function
     func logout_user(completion: @escaping (Result<Void, Error>) -> Void) {
         do {
-            // Attempt to sign the user out of Firebase
             try Auth.auth().signOut()
-            // Remove the user's UID from UserDefaults
             UserDefaults.standard.removeObject(forKey: "uid")
-            completion(.success(())) // Notify the caller of success
+            completion(.success(()))
         } catch let error {
-            completion(.failure(error)) // Notify the caller of any errors
+            completion(.failure(error))
         }
     }
-    
-    /**
-     Registers a new user with Firebase Authentication and creates a user record in Firestore.
-     
-     - Parameters:
-        - name: The user's full name.
-        - email: The user's email address (automatically converted to lowercase).
-        - password: The user's password.
-        - userType: A custom field indicating the user's role/type.
-        - completion: A closure that returns a `Result` indicating success or failure.
-     */
+
+    // Register user function
     func register_user(name: String, email: String, password: String, userType: String, completion: @escaping (Result<Void, Error>) -> Void) {
-        // Create a new Firebase Authentication user
         Auth.auth().createUser(withEmail: email.lowercased(), password: password) { authResult, error in
-            // Handle error if registration fails
             if let error = error as NSError? {
                 completion(.failure(error))
                 return
             }
             
-            // Ensure we have a valid user object
             guard let user = authResult?.user else {
                 let error = NSError(domain: "", code: -1, userInfo: [NSLocalizedDescriptionKey: "Failed to retrieve user ID"])
                 completion(.failure(error))
                 return
             }
             
-            // Save user ID to UserDefaults and update the local user_id property
             UserDefaults.standard.set(user.uid, forKey: "uid")
             self.user_id = user.uid
             
-            // Create a dictionary of user data to save in Firestore
             let userData: [String: Any] = [
-                "uid": user.uid,             // User ID
-                "email": email.lowercased(), // Lowercase email for consistency
-                "userType": userType,        // User role/type
-                "name": name                 // User's full name
+                "uid": user.uid,
+                "email": email.lowercased(),
+                "userType": userType,
+                "name": name
             ]
             
-            // Save the user data in Firestore under the user's UID
             self.users_db.document(user.uid).setData(userData) { error in
                 if let error = error {
-                    completion(.failure(error)) // Notify the caller if saving to Firestore fails
+                    completion(.failure(error))
                 } else {
-                    completion(.success(())) // Notify the caller of success
+                    completion(.success(()))
                 }
             }
         }
     }
-    
-    /**
-        Check if the business name has been taken
-        Parameters:
-            name: Business Name
-     */
+
+    // Check business name
     func check_business_name(name: String, completion: @escaping (Result<Void, Error>) -> Void) {
-        // Query the "users" collection for a document with the given business name
         users_db.whereField("name", isEqualTo: name).getDocuments { (querySnapshot, error) in
             if let error = error {
-                // Return the error if the query fails
                 completion(.failure(error))
             } else if let documents = querySnapshot?.documents, !documents.isEmpty {
-                // If documents exist, the business name has already been taken
                 let error = NSError(domain: "", code: 409, userInfo: [NSLocalizedDescriptionKey: "Business name is already taken."])
                 completion(.failure(error))
             } else {
-                // If no documents exist, the business name is available
                 completion(.success(()))
             }
         }
     }
-
 }

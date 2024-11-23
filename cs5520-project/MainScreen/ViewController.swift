@@ -93,8 +93,8 @@ class ViewController: UIViewController {
     
     private func navigateToForgotPasswordScreen() {
         print("Going to Forgot Password")
-//        let forgotPasswordVC = ForgotPasswordViewController()
-//        navigationController?.pushViewController(forgotPasswordVC, animated: true)
+        let forgotPasswordVC = ResetPasswordViewController()
+        navigationController?.pushViewController(forgotPasswordVC, animated: true)
     }
     
     private func navigateToHomeScreen() {
