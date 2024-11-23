@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		904D08AD2CEE448B007DC3B4 /* Firebase Healthkey iOS Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 904D08AC2CEE448B007DC3B4 /* Firebase Healthkey iOS Info.plist */; };
 		904D08B02CEE44D2007DC3B4 /* FirebaseAnalytics in Frameworks */ = {isa = PBXBuildFile; productRef = 904D08AF2CEE44D2007DC3B4 /* FirebaseAnalytics */; };
 		904D08B22CEE44D2007DC3B4 /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 904D08B12CEE44D2007DC3B4 /* FirebaseAuth */; };
 		904D08B42CEE44D2007DC3B4 /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = 904D08B32CEE44D2007DC3B4 /* FirebaseFirestore */; };
@@ -35,7 +34,6 @@
 		904D08412CEE4271007DC3B4 /* cs5520-project.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "cs5520-project.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		904D08572CEE4272007DC3B4 /* cs5520-projectTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "cs5520-projectTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		904D08612CEE4272007DC3B4 /* cs5520-projectUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "cs5520-projectUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
-		904D08AC2CEE448B007DC3B4 /* Firebase Healthkey iOS Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "Firebase Healthkey iOS Info.plist"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -101,7 +99,6 @@
 		904D08382CEE4271007DC3B4 = {
 			isa = PBXGroup;
 			children = (
-				904D08AC2CEE448B007DC3B4 /* Firebase Healthkey iOS Info.plist */,
 				904D08432CEE4271007DC3B4 /* cs5520-project */,
 				904D085A2CEE4272007DC3B4 /* cs5520-projectTests */,
 				904D08642CEE4272007DC3B4 /* cs5520-projectUITests */,
@@ -246,7 +243,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				904D08AD2CEE448B007DC3B4 /* Firebase Healthkey iOS Info.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

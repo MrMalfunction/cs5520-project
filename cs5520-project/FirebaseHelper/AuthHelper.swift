@@ -32,16 +32,26 @@ class AuthHelper {
      */
     func login_user(email: String, password: String, completion: @escaping (Result<Void, Error>) -> Void) {
         Auth.auth().signIn(withEmail: email, password: password) { authResult, error in
-            // Handle error if login fails
-            if let error = error {
-                completion(.failure(error))
+            // Handle errors during login
+            if let error = error as NSError? {
+                let userError: NSError
+                
+                // Check if the error is network-related
+                if error.code == NSURLErrorNotConnectedToInternet || error.code == NSURLErrorTimedOut {
+                    userError = NSError(domain: "", code: error.code, userInfo: [NSLocalizedDescriptionKey: "Network error. Please check your connection and try again."])
+                } else {
+                    // General error for invalid username or password
+                    userError = NSError(domain: "", code: error.code, userInfo: [NSLocalizedDescriptionKey: "Invalid username or password. Please try again."])
+                }
+                
+                completion(.failure(userError))
                 return
             }
             
             // Ensure we have a valid user object
             guard let user = authResult?.user else {
-                let error = NSError(domain: "", code: -1, userInfo: [NSLocalizedDescriptionKey: "Failed to retrieve user ID"])
-                completion(.failure(error))
+                let retrievalError = NSError(domain: "", code: -1, userInfo: [NSLocalizedDescriptionKey: "Failed to retrieve user. Please try again."])
+                completion(.failure(retrievalError))
                 return
             }
             
@@ -50,6 +60,9 @@ class AuthHelper {
             completion(.success(())) // Notify the caller of success
         }
     }
+
+
+
     
     /**
      Logs out the current user by signing them out and clearing their stored UID.
@@ -117,4 +130,27 @@ class AuthHelper {
             }
         }
     }
+    
+    /**
+        Check if the business name has been taken
+        Parameters:
+            name: Business Name
+     */
+    func check_business_name(name: String, completion: @escaping (Result<Void, Error>) -> Void) {
+        // Query the "users" collection for a document with the given business name
+        users_db.whereField("name", isEqualTo: name).getDocuments { (querySnapshot, error) in
+            if let error = error {
+                // Return the error if the query fails
+                completion(.failure(error))
+            } else if let documents = querySnapshot?.documents, !documents.isEmpty {
+                // If documents exist, the business name has already been taken
+                let error = NSError(domain: "", code: 409, userInfo: [NSLocalizedDescriptionKey: "Business name is already taken."])
+                completion(.failure(error))
+            } else {
+                // If no documents exist, the business name is available
+                completion(.success(()))
+            }
+        }
+    }
+
 }
