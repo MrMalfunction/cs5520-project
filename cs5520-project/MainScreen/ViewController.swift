@@ -77,6 +77,7 @@ class ViewController: UIViewController {
             switch result {
             case .success:
                 print("Login successful.")
+                
                 self?.navigateToHomeScreen()
             case .failure(let error):
                 self?.showAlert(title: "Login Failed", message: error.localizedDescription)

@@ -76,6 +76,42 @@ class AuthHelper {
                 return
             }
             
+            self.users_db.whereField("uid", isEqualTo: user.uid).getDocuments { (querySnapshot, error) in
+                if let error = error {
+                    // Handle Firestore query error
+                    completion(.failure(error))
+                    return
+                }
+                
+                guard let documents = querySnapshot?.documents, !documents.isEmpty else {
+                    // Handle case where no user is found
+                    let notFoundError = NSError(
+                        domain: "",
+                        code: -1,
+                        userInfo: [NSLocalizedDescriptionKey: "User not found. Please check the UID."]
+                    )
+                    completion(.failure(notFoundError))
+                    return
+                }
+                
+                // Assuming there is only one user document for the given UID
+                let document = documents.first
+                if let userType = document?.get("userType") as? String {
+                    // Store the userType in UserDefaults
+                    UserDefaults.standard.set(userType, forKey: "userType")
+                    completion(.success(()))
+                } else {
+                    // Handle case where the userType field is missing
+                    let missingFieldError = NSError(
+                        domain: "",
+                        code: -1,
+                        userInfo: [NSLocalizedDescriptionKey: "UserType field is missing for this user."]
+                    )
+                    completion(.failure(missingFieldError))
+                }
+            }
+            
+            UserDefaults.standard.set(user.uid, forKey: "uid")
             UserDefaults.standard.set(user.uid, forKey: "uid")
             completion(.success(()))
         }
