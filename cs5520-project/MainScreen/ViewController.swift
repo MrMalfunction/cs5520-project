@@ -13,6 +13,7 @@ class ViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        autoLogin()
         setupLoginView()
         setupActions()
         let tapRecognizer = UITapGestureRecognizer(target: self, action: #selector(hideKeyboardOnTap))
@@ -30,6 +31,13 @@ class ViewController: UIViewController {
     // MARK: - Keyboard Handling
     @objc private func hideKeyboardOnTap() {
         view.endEditing(true)
+    }
+    
+    // MARK: - Auto Login
+    private func autoLogin(){
+        if (UserDefaults.standard.string(forKey: "userType") ?? "" != "" && UserDefaults.standard.string(forKey: "uid") ?? "" != ""){
+            navigateToHomeScreen()
+        }
     }
     
     // MARK: - Setup Actions
@@ -99,9 +107,29 @@ class ViewController: UIViewController {
     }
     
     private func navigateToHomeScreen() {
-        print("Going to HomeScreen")
-//        let homeVC = HomeViewController()
-//        navigationController?.pushViewController(homeVC, animated: true)
+        let userType = UserDefaults.standard.string(forKey: "userType") ?? ""
+
+        if userType.isEmpty {
+            showAlert(title: "Error", message: "User type is not set. Please configure it in settings.")
+        } else {
+            switch userType {
+            case "Patient":
+                let patientHS = PatientHSController()
+                navigationController?.pushViewController(patientHS, animated: true)
+                
+            case "Hospital":
+                let hospitalHS = HospitalHSController()
+                navigationController?.pushViewController(hospitalHS, animated: true)
+                
+            case "Insurance Company":
+                let insuranceHS = InsuranceHSController()
+                navigationController?.pushViewController(insuranceHS, animated: true)
+                
+            default:
+                print("Unknown user type")
+                showAlert(title: "Error", message: "Unknown user type. Please contact support.")
+            }
+        }
     }
     
     // MARK: - Show Alert

@@ -29,30 +29,6 @@ class AuthHelper {
             completion(.success(()))
         }
     }
-
-    // Send email verification
-    func send_email_verification(completion: @escaping (Result<Void, Error>) -> Void) {
-        guard let currentUser = Auth.auth().currentUser else {
-            let error = NSError(domain: "", code: -1, userInfo: [NSLocalizedDescriptionKey: "No user is logged in."])
-            completion(.failure(error))
-            return
-        }
-        
-        // Check if email is already verified
-        if currentUser.isEmailVerified {
-            completion(.success(()))
-        } else {
-            // Send verification email
-            currentUser.sendEmailVerification { error in
-                if let error = error {
-                    completion(.failure(error))
-                    return
-                }
-                // Notify the caller of success
-                completion(.success(()))
-            }
-        }
-    }
     
     // Login function
     func login_user(email: String, password: String, completion: @escaping (Result<Void, Error>) -> Void) {
@@ -111,7 +87,6 @@ class AuthHelper {
                 }
             }
             
-            UserDefaults.standard.set(user.uid, forKey: "uid")
             UserDefaults.standard.set(user.uid, forKey: "uid")
             completion(.success(()))
         }
