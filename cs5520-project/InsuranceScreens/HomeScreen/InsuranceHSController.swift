@@ -1,31 +1,79 @@
-//
-//  InsuranceHSController.swift
-//  cs5520-project
-//
-//  Created by Amol Bohora on 11/25/24.
-//
-
 import UIKit
 
 class InsuranceHSController: UIViewController {
 
-    // MARK: - Properties
-    private let customView = InsuranceHSView() // Replace with your custom UIView class
+    private let customView = InsuranceHSView()
 
-    // MARK: - Lifecycle Methods
     override func loadView() {
-        // Assign the custom view to the controller's view
         view = customView
     }
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        setupBindings()
+        setupNavigationBar()
     }
 
-    // MARK: - Private Methods
-    private func setupBindings() {
-        // Add target-action or delegate bindings here
-        // Example: customView.someButton.addTarget(self, action: #selector(handleButtonTap), for: .touchUpInside)
+    // Setup Navigation Bar
+    private func setupNavigationBar() {
+        title = "Insurance Home" // Main title in navigation bar
+
+        // Profile Button (Left)
+        let profileButton = UIBarButtonItem(
+            image: UIImage(systemName: "person.circle"),
+            style: .plain,
+            target: self,
+            action: #selector(onProfileButtonTapped)
+        )
+        navigationItem.leftBarButtonItem = profileButton
+
+        // Logout Button (Right)
+        let logoutButton = UIBarButtonItem(
+            title: "Logout",
+            style: .plain,
+            target: self,
+            action: #selector(onLogoutButtonTapped)
+        )
+        navigationItem.rightBarButtonItem = logoutButton
+    }
+
+    @objc private func onProfileButtonTapped() {
+        let profileController = InsuranceProfileController()
+        navigationController?.pushViewController(profileController, animated: true)
+    }
+
+    @objc private func onLogoutButtonTapped() {
+        // Clear user session and navigate to login
+        UserDefaults.standard.removeObject(forKey: "uid")
+        UserDefaults.standard.removeObject(forKey: "userType")
+        navigationController?.popToRootViewController(animated: true)
     }
 }
+
+
+
+   
+
+
+  
+
+
+
+
+
+
+//    @objc private func onPatientsDetailsTapped() {
+//        // Example of navigating to another screen
+//        let patientsDetailsViewController = PatientsDetailsViewController() // Placeholder controller
+//        navigationController?.pushViewController(patientsDetailsViewController, animated: true)
+//    }
+//
+//    @objc private func onPatientsDetailsTapped() {
+//        // Debug placeholder
+//        print("Patients Details button tapped!")
+//        let alert = UIAlertController(title: "Coming Soon", message: "Feature under development.", preferredStyle: .alert)
+//        alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
+//        present(alert, animated: true)
+//    }
+
+
+
