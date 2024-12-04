@@ -10,11 +10,12 @@ import UIKit
 class ViewController: UIViewController {
 
     private var loginView: LoginView!
+    private let authHelper = AuthHelper()
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        autoLogin()
         setupLoginView()
+        autoLogin()
         setupActions()
         let tapRecognizer = UITapGestureRecognizer(target: self, action: #selector(hideKeyboardOnTap))
         loginView.showPasswordButton.addTarget(self, action: #selector(togglePasswordVisibility), for: .touchUpInside)
@@ -35,7 +36,7 @@ class ViewController: UIViewController {
     
     // MARK: - Auto Login
     private func autoLogin(){
-        if (UserDefaults.standard.string(forKey: "userType") ?? "" != "" && UserDefaults.standard.string(forKey: "uid") ?? "" != ""){
+        if (UserDefaults.standard.string(forKey: "userType") ?? "" != "" && UserDefaults.standard.string(forKey: "uid") ?? "" != "" && self.authHelper.login_check()){
             navigateToHomeScreen()
         }
     }
@@ -80,8 +81,7 @@ class ViewController: UIViewController {
     
     // MARK: - Login User
     private func loginUser(email: String, password: String) {
-        var authHelper = AuthHelper()
-        authHelper.login_user(email: email, password: password) { [weak self] result in
+        self.authHelper.login_user(email: email, password: password) { [weak self] result in
             switch result {
             case .success:
                 print("Login successful.")
@@ -107,11 +107,20 @@ class ViewController: UIViewController {
     }
     
     private func navigateToHomeScreen() {
+
         let userType = UserDefaults.standard.string(forKey: "userType") ?? ""
 
         if userType.isEmpty {
             showAlert(title: "Error", message: "User type is not set. Please configure it in settings.")
         } else {
+            // Safely unwrap the text values
+            if self.loginView.emailField.text != nil {
+                loginView.emailField.text = "" // Reset text if it exists
+            }
+                
+            if self.loginView.passwordField.text != nil {
+                loginView.passwordField.text = "" // Reset text if it exists
+            }
             switch userType {
             case "Patient":
                 let patientHS = PatientHSController()

@@ -5,16 +5,13 @@
 //  Created by Amol Bohora on 11/25/24.
 //
 
-
-
 import UIKit
 
 class PatientHSController: UIViewController {
     
-    // MARK: - Properties
     private let customView = PatientHSView() // Custom view for the Home Screen
+    private let authHelper = AuthHelper()
 
-    // MARK: - Lifecycle Methods
     override func loadView() {
         // Assign the custom view to the controller's view
         view = customView
@@ -23,10 +20,11 @@ class PatientHSController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         setupBindings()
-        
+        self.navigationItem.hidesBackButton = true
+        setupNavigationBar()
         // Set up button actions
         customView.provideAccessButton.addTarget(self, action: #selector(onProvideAccessTapped), for: .touchUpInside)
-        customView.userPhotoButton.addTarget(self, action: #selector(onUserPhotoTapped), for: .touchUpInside)
+//        customView.userPhotoButton.addTarget(self, action: #selector(onUserPhotoTapped), for: .touchUpInside)
     }
 
     // MARK: - Private Methods
@@ -37,6 +35,19 @@ class PatientHSController: UIViewController {
         customView.reviewAccessButton.addTarget(self, action: #selector(onReviewAccessTapped), for: .touchUpInside)
     }
 
+    private func setupNavigationBar() {
+        // Create profile button
+        let profileButton = UIBarButtonItem(image: UIImage(systemName: "person.crop.circle.fill"),
+                                            style: .plain, target: self, action: #selector(profileButtonTapped))
+        profileButton.tintColor = .systemBlue
+        navigationItem.leftBarButtonItem = profileButton
+        
+        // Create logout button
+        let logoutButton = UIBarButtonItem(title: "Logout", style: .plain, target: self, action: #selector(logoutButtonTapped))
+        logoutButton.tintColor = .systemRed
+        navigationItem.rightBarButtonItem = logoutButton
+    }
+
     @objc private func onAddMedicalRecordTapped() {
         // Navigate to the Add Medical Record screen
         let addMedicalRecordController = AddPatientRecordController()
@@ -45,19 +56,41 @@ class PatientHSController: UIViewController {
     
     @objc private func onProvideAccessTapped() {
         // Handle "Provide Access" screen navigation
-        // Navigate to the Provide Access screen (implement the screen as per your design)
-        // Navigate to the Provide Access screen
         let provideAccessController = ProvideAccessController()
         navigationController?.pushViewController(provideAccessController, animated: true)
     }
     
     @objc private func onReviewAccessTapped() {
         let reviewAccessController = ReviewAccessController()
-         navigationController?.pushViewController(reviewAccessController, animated: true)
+        navigationController?.pushViewController(reviewAccessController, animated: true)
     }
     
     @objc private func onUserPhotoTapped() {
         let userProfileController = UserProfileController()
         navigationController?.pushViewController(userProfileController, animated: true)
+    }
+
+    @objc private func profileButtonTapped() {
+        // Handle profile button tap (navigate to profile view or handle functionality)
+        print("Profile button tapped")
+        let userProfileController = UserProfileController()
+        self.navigationController?.pushViewController(userProfileController, animated: true)
+    }
+
+    @objc private func logoutButtonTapped() {
+        // Handle logout button tap (perform logout or show confirmation)
+        print("Logout button tapped")
+        // Perform logout functionality (e.g., navigate to login screen, clear session, etc.)
+        self.authHelper.logout_user(){
+            result in
+            switch result{
+            case .success:
+                    print("Logout Success")
+            case .failure:
+                print("Logout Failure")
+            }
+            self.navigationController?.popToRootViewController(animated: true)
+        }
+        
     }
 }

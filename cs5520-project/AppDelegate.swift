@@ -17,17 +17,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         // Initialize Firebase
         FirebaseApp.configure()
         
-        // Create the main window
-        window = UIWindow(frame: UIScreen.main.bounds)
-        
-        // Set the root view controller to be wrapped in a navigation controller
-        let rootViewController = InsuranceHSController() // Replace with your initial view controller
-        let navigationController = UINavigationController(rootViewController: rootViewController)
-        
-        // Set the root view controller of the window
-        window?.rootViewController = navigationController
-        window?.makeKeyAndVisible()
-        
         return true
     }
 

@@ -1,10 +1,3 @@
-//
-//  PatientHSView.swift
-//  cs5520-project
-//
-//  Created by Amol Bohora on 11/25/24.
-//
-
 import UIKit
 
 class PatientHSView: UIView {
@@ -14,8 +7,6 @@ class PatientHSView: UIView {
     let addMedicalRecordButton = UIButton(type: .system)
     let provideAccessButton = UIButton(type: .system)
     let reviewAccessButton = UIButton(type: .system)
-    let userPhotoButton = UIButton(type: .custom)
-
 
     // MARK: - Initializers
     override init(frame: CGRect) {
@@ -44,12 +35,6 @@ class PatientHSView: UIView {
         setupButton(button: addMedicalRecordButton, title: "Add Medical Records")
         setupButton(button: provideAccessButton, title: "Provide Access")
         setupButton(button: reviewAccessButton, title: "Review Access")
-        
-        // User Photo Button
-        userPhotoButton.setImage(UIImage(systemName: "person.crop.circle"), for: .normal)
-        userPhotoButton.tintColor = .systemBlue
-        userPhotoButton.translatesAutoresizingMaskIntoConstraints = false
-        addSubview(userPhotoButton)
     }
 
     private func setupButton(button: UIButton, title: String) {
@@ -75,7 +60,7 @@ class PatientHSView: UIView {
 
         NSLayoutConstraint.activate([
             // Title Label
-            titleLabel.topAnchor.constraint(equalTo: safeAreaLayoutGuide.topAnchor, constant: 40),
+            titleLabel.topAnchor.constraint(equalTo: safeAreaLayoutGuide.topAnchor, constant: 20),
             titleLabel.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 20),
             titleLabel.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -20),
             
@@ -96,11 +81,6 @@ class PatientHSView: UIView {
             reviewAccessButton.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 20),
             reviewAccessButton.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -20),
             reviewAccessButton.heightAnchor.constraint(equalToConstant: 60),
-            
-            userPhotoButton.topAnchor.constraint(equalTo: safeAreaLayoutGuide.topAnchor, constant: 10),
-            userPhotoButton.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -20),
-            userPhotoButton.widthAnchor.constraint(equalToConstant: 40),
-            userPhotoButton.heightAnchor.constraint(equalToConstant: 40)
         ])
     }
 }

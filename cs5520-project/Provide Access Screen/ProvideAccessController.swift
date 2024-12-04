@@ -73,7 +73,7 @@ class ProvideAccessController: UIViewController {
         }
         
         // Grant access to hospital
-        authHelper.grantAccessToHospital(hospitalCode: hospitalCode, requestType: "viewOrEdit") { [weak self] result in
+        authHelper.grantAccessToHospital(hospitalCode: hospitalCode, requestType: "viewOrEdit") { [weak self] (result: Result<Void, Error>) in
             switch result {
             case .success:
                 self?.showAlert(message: "Access successfully granted to hospital with code \(hospitalCode).")
