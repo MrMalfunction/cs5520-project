@@ -33,8 +33,8 @@ class PatientHSView: UIView {
         
         // Setup the buttons with style
         setupButton(button: addMedicalRecordButton, title: "Add Medical Records")
-        setupButton(button: provideAccessButton, title: "Provide Access")
-        setupButton(button: reviewAccessButton, title: "Review Access")
+        setupButton(button: provideAccessButton, title: "Provide Hospital Access")
+        setupButton(button: reviewAccessButton, title: "Review Hospital Access")
     }
 
     private func setupButton(button: UIButton, title: String) {

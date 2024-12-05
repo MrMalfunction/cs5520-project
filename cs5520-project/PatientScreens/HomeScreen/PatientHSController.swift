@@ -56,12 +56,12 @@ class PatientHSController: UIViewController {
     
     @objc private func onProvideAccessTapped() {
         // Handle "Provide Access" screen navigation
-        let provideAccessController = ProvideAccessController()
+        let provideAccessController = ProvideHospitalAccessController()
         navigationController?.pushViewController(provideAccessController, animated: true)
     }
     
     @objc private func onReviewAccessTapped() {
-        let reviewAccessController = ReviewAccessController()
+        let reviewAccessController = ReviewHospitalAccessController()
         navigationController?.pushViewController(reviewAccessController, animated: true)
     }
     

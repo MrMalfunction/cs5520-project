@@ -1,10 +1,3 @@
-//
-//  SignupController.swift
-//  cs5520-project
-//
-//  Created by Amol Bohora on 11/23/24.
-//
-
 import UIKit
 
 class SignupViewController: UIViewController {
@@ -80,6 +73,47 @@ class SignupViewController: UIViewController {
                 switch result {
                 case .success:
                     self?.registerUser(name: name, email: email, password: password, userType: userType)
+                    
+                    switch userType {
+                    case "Hospital":
+                        self?.authHelper.registerNewHospital(name: name) { result in
+                            switch result {
+                            case .success():
+                                // On success, pop to the root view controller
+                                DispatchQueue.main.async {
+                                    self?.navigationController?.popToRootViewController(animated: true)
+                                }
+                            case .failure(let error):
+                                // On failure, use showAlert to display the error message
+                                DispatchQueue.main.async {
+                                    self?.showAlert(message: "Error registering hospital: \(error.localizedDescription)") {
+                                        // You can optionally perform additional actions after alert is dismissed, if needed
+                                    }
+                                }
+                            }
+                        }
+                    case "Insurance Company":
+                        self?.authHelper.registerNewInsurance(name: name) { result in
+                            switch result {
+                            case .success():
+                                // On success, pop to the root view controller
+                                DispatchQueue.main.async {
+                                    self?.navigationController?.popToRootViewController(animated: true)
+                                }
+                            case .failure(let error):
+                                // On failure, use showAlert to display the error message
+                                DispatchQueue.main.async {
+                                    self?.showAlert(message: "Error registering insurance company: \(error.localizedDescription)") {
+                                        // You can optionally perform additional actions after alert is dismissed, if needed
+                                    }
+                                }
+                            }
+                        }
+                    default:
+                        print("INCORRECT USER TPYE")
+                    }
+
+                    
                     self?.navigationController?.popViewController(animated: true)
                 case .failure:
                     self?.showAlert(message: "Business name already exists.")

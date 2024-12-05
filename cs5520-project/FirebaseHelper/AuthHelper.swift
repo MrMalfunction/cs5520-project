@@ -15,11 +15,17 @@ class AuthHelper {
     private let medicalRecordsDB: CollectionReference
     private let accessRequestsDB: CollectionReference
     
+    private let hospitalRecords: CollectionReference
+    private let insurersRecords: CollectionReference
+    
     init() {
         self.user_id = UserDefaults.standard.string(forKey: "uid") ?? ""
         self.users_db = db.collection("users")
         self.medicalRecordsDB = db.collection("medicalRecords")
         self.accessRequestsDB = db.collection("accessRequests")
+        
+        self.hospitalRecords = db.collection("hospitalRecords")
+        self.insurersRecords = db.collection("insurersRecords")
     }
     
     func reset_password(email: String, completion: @escaping (Result<Void, Error>) -> Void) {
@@ -151,6 +157,47 @@ class AuthHelper {
                 }
             }
         }
+    
+    func registerNewHospital(name: String, completion: @escaping (Result<Void, Error>) -> Void) {
+        // Create a reference to the Firestore collection
+        
+        // Prepare the new hospital data
+        let hospitalData: [String: Any] = [
+            "name": name,
+            "linkedPatients": []
+        ]
+        
+        // Add the new hospital to Firestore
+        self.hospitalRecords.addDocument(data: hospitalData) { error in
+            if let error = error {
+                completion(.failure(error))
+            } else {
+                completion(.success(()))
+            }
+        }
+    }
+    
+    func registerNewInsurance(name: String, completion: @escaping (Result<Void, Error>) -> Void) {
+        // Create a reference to the Firestore collection
+        let insurersCollection = self.db.collection("insurersRecords")
+        
+        // Prepare the new insurance data (change the data structure as needed for insurance)
+        let insuranceData: [String: Any] = [
+            "name": name,
+            "linkedPatients": []  // Adjust based on how you want to link patients to insurers
+        ]
+        
+        // Add the new insurance record to Firestore
+        insurersCollection.addDocument(data: insuranceData) { error in
+            if let error = error {
+                completion(.failure(error))
+            } else {
+                completion(.success(()))
+            }
+        }
+    }
+
+
         
         func check_business_name(name: String, completion: @escaping (Result<Void, Error>) -> Void) {
             users_db.whereField("name", isEqualTo: name).getDocuments { (querySnapshot, error) in
@@ -205,34 +252,6 @@ class AuthHelper {
             }
         }
         
-        
-        //    // Fetch all hospitals that the patient has granted access to
-        //     func fetchGrantedAccess(completion: @escaping (Result<[[String: Any]], Error>) -> Void) {
-        //         guard !user_id.isEmpty else {
-        //             completion(.failure(NSError(domain: "", code: 401, userInfo: [NSLocalizedDescriptionKey: "User not logged in."])))
-        //             return
-        //         }
-        //
-        //         accessRequestsDB.whereField("patientId", isEqualTo: user_id).whereField("status", isEqualTo: "approved").getDocuments { (querySnapshot, error) in
-        //             if let error = error {
-        //                 completion(.failure(error))
-        //                 return
-        //             }
-        //             let accessList = querySnapshot?.documents.map { $0.data().merging(["id": $0.documentID]) { _, new in new } } ?? []
-        //             completion(.success(accessList))
-        //         }
-        //     }
-        //
-        //     // Remove access for a specific hospital
-        //     func revokeAccess(requestID: String, completion: @escaping (Result<Void, Error>) -> Void) {
-        //         accessRequestsDB.document(requestID).updateData(["status": "revoked"]) { error in
-        //             if let error = error {
-        //                 completion(.failure(error))
-        //             } else {
-        //                 completion(.success(()))
-        //             }
-        //         }
-        //     }
         
         // Fetch hospitals granted access
         func fetchGrantedAccess(completion: @escaping (Result<[[String: Any]], Error>) -> Void) {
@@ -322,9 +341,9 @@ class AuthHelper {
                 userProfileData[.linkedInsurers] = linkedInsurers
             }
                 
-            if let profilePhoto = document.get(UserProfileKey.profileImage.rawValue) as? String {
-                userProfileData[.profileImage] = profilePhoto
-            }
+                if let profilePhoto = document.get(UserProfileKey.profileImage.rawValue) as? String {
+                    userProfileData[.profileImage] = profilePhoto
+                }
             
             // Return the data via completion handler
             completion(.success(userProfileData))
