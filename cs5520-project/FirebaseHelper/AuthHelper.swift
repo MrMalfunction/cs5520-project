@@ -322,9 +322,9 @@ class AuthHelper {
                 userProfileData[.linkedInsurers] = linkedInsurers
             }
                 
-                if let profilePhoto = document.get(UserProfileKey.profileImage.rawValue) as? String {
-                    userProfileData[.profileImage] = profilePhoto
-                }
+            if let profilePhoto = document.get(UserProfileKey.profileImage.rawValue) as? String {
+                userProfileData[.profileImage] = profilePhoto
+            }
             
             // Return the data via completion handler
             completion(.success(userProfileData))

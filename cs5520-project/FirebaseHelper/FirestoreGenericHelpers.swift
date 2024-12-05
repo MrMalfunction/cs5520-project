@@ -47,4 +47,42 @@ class FirestoreGenericHelpers {
         }
     }
     
+    func fetchBusinessIDsForInsuranceCompanies(completion: @escaping (Result<[String], Error>) -> Void) {
+        // Query the `users_db` collection where `userType` is "Insurance Company"
+        users_db
+            .whereField("userType", isEqualTo: "Insurance Company")
+            .getDocuments { (querySnapshot, error) in
+                
+                // Handle errors
+                if let error = error {
+                    completion(.failure(error))
+                    return
+                }
+                
+                // Ensure snapshot is not nil
+                guard let snapshot = querySnapshot else {
+                    completion(.failure(NSError(domain: "FirestoreError", code: -1, userInfo: [NSLocalizedDescriptionKey: "No data found"])))
+                    return
+                }
+                
+                // Extract businessID from documents
+                var businessIDs: [String] = []
+                for document in snapshot.documents {
+                    if let businessID = document.data()["businessID"] as? String {
+                        businessIDs.append(businessID)
+                    }
+                }
+                
+                // Check if the array is empty
+                if businessIDs.isEmpty {
+                    // Provide a sample list if no data is found
+                    let sampleBusinessIDs = ["sampleID1", "sampleID2", "sampleID3"]
+                    completion(.success(sampleBusinessIDs))
+                } else {
+                    // Return the retrieved list if not empty
+                    completion(.success(businessIDs))
+                }
+            }
+    }
+    
 }

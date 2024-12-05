@@ -1,6 +1,6 @@
 import UIKit
 
-class UserProfileView: UIView {
+class UserProfileView: UIView, UIPickerViewDataSource, UIPickerViewDelegate {
     
     // MARK: - UI Components
     let profileImageView = UIImageView()
@@ -9,8 +9,8 @@ class UserProfileView: UIView {
     let fullNameField = UITextField()
     let emailField = UITextField()
     let currentProviderLabel = UILabel()
-    let insuranceProviderCodeField = UITextField()
     let updateButton = UIButton(type: .system)
+    let insuranceProviderCodeField = UITextField()
     
     // Labels for Text Fields
     let userIdLabel = UILabel()
@@ -18,21 +18,37 @@ class UserProfileView: UIView {
     let emailLabel = UILabel()
     let insuranceProviderCodeLabel = UILabel()
     
+    // Picker for Insurance Providers
+    let insuranceProviderPicker = UIPickerView()
+    
+    // Data for Picker (Will be populated by the controller)
+    var insuranceProviders: [String] = [] {
+        didSet {
+            insuranceProviderPicker.reloadAllComponents()
+        }
+    }
+    
+    // Selected Provider
+    var selectedProvider: String? {
+        didSet {
+            insuranceProviderCodeField.text = selectedProvider
+        }
+    }
+    
     // MARK: - Initializers
     override init(frame: CGRect) {
         super.init(frame: frame)
         setupViews()
         setupConstraints()
         setupTextFieldObservations()
+        /*setupPickerView*/()
     }
     
     required init?(coder: NSCoder) {
         super.init(coder: coder)
-        setupViews()
-        setupConstraints()
-        setupTextFieldObservations()
     }
     
+    // MARK: - Setup Views
     private func setupViews() {
         backgroundColor = .white
         
@@ -58,18 +74,20 @@ class UserProfileView: UIView {
         // Full Name Field
         setupTextField(fullNameField, placeholder: "User's Full Name", label: fullNameLabel)
         
-        // Email Field
-        setupTextField(emailField, placeholder: "Email Address", label: emailLabel)
+        // Email Field (Disabled)
+        setupTextField(emailField, placeholder: "Email Address", isEditable: false, label: emailLabel)
         
         // Current Provider Label
         currentProviderLabel.text = "Current Provider Name"
         currentProviderLabel.textColor = .darkGray
         currentProviderLabel.font = UIFont.systemFont(ofSize: 16)
         currentProviderLabel.translatesAutoresizingMaskIntoConstraints = false
+        
         addSubview(currentProviderLabel)
         
-        // Insurance Provider Code Field
-        setupTextField(insuranceProviderCodeField, placeholder: "Insurance Provider Code", label: insuranceProviderCodeLabel)
+        // Insurance Provider Code Field (Dropdown)
+        setupTextField(insuranceProviderCodeField, placeholder: "Select Insurance Provider", label: insuranceProviderCodeLabel)
+        insuranceProviderCodeField.inputView = insuranceProviderPicker
         
         // Update Button
         updateButton.setTitle("Update", for: .normal)
@@ -86,7 +104,6 @@ class UserProfileView: UIView {
         textField.isUserInteractionEnabled = isEditable
         textField.translatesAutoresizingMaskIntoConstraints = false
         
-        // Setup label (Initially as placeholder)
         label.text = placeholder
         label.font = UIFont.systemFont(ofSize: 12)
         label.textColor = .gray
@@ -97,7 +114,7 @@ class UserProfileView: UIView {
     }
     
     private func setupTextFieldObservations() {
-        [userIdField, fullNameField, emailField, insuranceProviderCodeField].forEach { textField in
+        [userIdField, fullNameField, emailField].forEach { textField in
             textField.addTarget(self, action: #selector(textFieldEditingChanged), for: .editingChanged)
         }
     }
@@ -112,40 +129,60 @@ class UserProfileView: UIView {
             label = fullNameLabel
         case emailField:
             label = emailLabel
-        case insuranceProviderCodeField:
-            label = insuranceProviderCodeLabel
         default:
             return
         }
         
-        // Show label above text field if text is not empty, otherwise hide it
         if sender.text?.isEmpty == true {
             UIView.animate(withDuration: 0.3) {
                 label.isHidden = true
-                sender.transform = .identity // Reset text field position
+                sender.transform = .identity
             }
         } else {
             UIView.animate(withDuration: 0.3) {
                 label.isHidden = false
-                label.transform = CGAffineTransform(translationX: 0, y: 0) // Move label up
-                sender.transform = CGAffineTransform(translationX: 0, y: 0) // Push text field down
+                label.transform = .identity
+                sender.transform = .identity
             }
         }
     }
     
+    // MARK: - Picker View Setup
+//    private func setupPickerView() {
+//        insuranceProviderPicker.dataSource = self
+//        insuranceProviderPicker.delegate = self
+//    }
+    
+    // MARK: - Picker View Data Source
+    func numberOfComponents(in pickerView: UIPickerView) -> Int {
+        return 1
+    }
+    
+    func pickerView(_ pickerView: UIPickerView, numberOfRowsInComponent component: Int) -> Int {
+        return insuranceProviders.count
+    }
+    
+    // MARK: - Picker View Delegate
+    func pickerView(_ pickerView: UIPickerView, titleForRow row: Int, forComponent component: Int) -> String? {
+        return insuranceProviders[row]
+    }
+    
+    func pickerView(_ pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int) {
+        selectedProvider = insuranceProviders[row]
+        insuranceProviderCodeField.resignFirstResponder()
+    }
+    
+    // MARK: - Setup Constraints
     private func setupConstraints() {
         NSLayoutConstraint.activate([
-            // Profile Image View
             profileImageView.topAnchor.constraint(equalTo: safeAreaLayoutGuide.topAnchor, constant: 20),
             profileImageView.centerXAnchor.constraint(equalTo: centerXAnchor),
             profileImageView.widthAnchor.constraint(equalToConstant: 100),
             profileImageView.heightAnchor.constraint(equalToConstant: 100),
             
-            // Update Image Button
             updateImageButton.topAnchor.constraint(equalTo: profileImageView.bottomAnchor, constant: 10),
             updateImageButton.centerXAnchor.constraint(equalTo: centerXAnchor),
             
-            // User ID Label and Field
             userIdLabel.topAnchor.constraint(equalTo: updateImageButton.bottomAnchor, constant: 20),
             userIdLabel.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 20),
             userIdLabel.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -20),
@@ -155,7 +192,6 @@ class UserProfileView: UIView {
             userIdField.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -20),
             userIdField.heightAnchor.constraint(equalToConstant: 50),
             
-            // Full Name Label and Field
             fullNameLabel.topAnchor.constraint(equalTo: userIdField.bottomAnchor, constant: 20),
             fullNameLabel.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 20),
             fullNameLabel.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -20),
@@ -165,7 +201,6 @@ class UserProfileView: UIView {
             fullNameField.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -20),
             fullNameField.heightAnchor.constraint(equalToConstant: 50),
             
-            // Email Label and Field
             emailLabel.topAnchor.constraint(equalTo: fullNameField.bottomAnchor, constant: 20),
             emailLabel.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 20),
             emailLabel.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -20),
@@ -175,12 +210,10 @@ class UserProfileView: UIView {
             emailField.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -20),
             emailField.heightAnchor.constraint(equalToConstant: 50),
             
-            // Current Provider Label
             currentProviderLabel.topAnchor.constraint(equalTo: emailField.bottomAnchor, constant: 20),
             currentProviderLabel.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 20),
             currentProviderLabel.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -20),
             
-            // Insurance Provider Code Label and Field
             insuranceProviderCodeLabel.topAnchor.constraint(equalTo: currentProviderLabel.bottomAnchor, constant: 20),
             insuranceProviderCodeLabel.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 20),
             insuranceProviderCodeLabel.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -20),
@@ -190,8 +223,7 @@ class UserProfileView: UIView {
             insuranceProviderCodeField.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -20),
             insuranceProviderCodeField.heightAnchor.constraint(equalToConstant: 50),
             
-            // Update Button
-            updateButton.topAnchor.constraint(equalTo: insuranceProviderCodeField.bottomAnchor, constant: 30),
+            updateButton.topAnchor.constraint(equalTo: insuranceProviderCodeField.bottomAnchor, constant: 20),
             updateButton.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 20),
             updateButton.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -20),
             updateButton.heightAnchor.constraint(equalToConstant: 50)

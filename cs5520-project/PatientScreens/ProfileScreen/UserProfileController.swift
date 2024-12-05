@@ -2,13 +2,14 @@ import UIKit
 import PhotosUI
 import Firebase
 
-class UserProfileController: UIViewController, UIImagePickerControllerDelegate, UINavigationControllerDelegate, PHPickerViewControllerDelegate {
-    
+class UserProfileController: UIViewController, UIImagePickerControllerDelegate, UINavigationControllerDelegate, PHPickerViewControllerDelegate, UIPickerViewDelegate, UIPickerViewDataSource {
+
     // MARK: - Properties
     private let userProfileView = UserProfileView()
     private let authHelper = AuthHelper()
     private let firestoreHelper = FirestoreGenericHelpers()
     private let activityIndicator = UIActivityIndicatorView(style: .large)
+    private var businessIDs: [String] = [] // Store fetched business IDs
     
     override func loadView() {
         view = userProfileView
@@ -20,6 +21,8 @@ class UserProfileController: UIViewController, UIImagePickerControllerDelegate, 
         loadUserData()
         setupActions()
         setupActivityIndicator()
+        configurePickerView()
+        fetchBusinessIDsAndPopulatePicker() // Fetch and populate picker data
     }
     
     private func setupActivityIndicator() {
@@ -41,6 +44,45 @@ class UserProfileController: UIViewController, UIImagePickerControllerDelegate, 
         userProfileView.updateButton.addTarget(self, action: #selector(onUpdateProfileTapped), for: .touchUpInside)
     }
     
+    private func configurePickerView() {
+        userProfileView.insuranceProviderPicker.delegate = self
+    }
+    
+    private func fetchBusinessIDsAndPopulatePicker() {
+        firestoreHelper.fetchBusinessIDsForInsuranceCompanies { [weak self] result in
+            DispatchQueue.main.async {
+                switch result {
+                case .success(let ids):
+                    self?.businessIDs = ids
+                    self?.userProfileView.insuranceProviderPicker.reloadAllComponents()
+                    if let firstProvider = self?.businessIDs.first {
+                        self?.userProfileView.currentProviderLabel.text = "Selected Provider: \(firstProvider)"
+                    }
+                case .failure(let error):
+                    self?.showAlert(message: "Failed to fetch business IDs: \(error.localizedDescription)")
+                }
+            }
+        }
+    }
+    
+    // MARK: - UIPickerViewDelegate & UIPickerViewDataSource
+    func numberOfComponents(in pickerView: UIPickerView) -> Int {
+        return 1
+    }
+    
+    func pickerView(_ pickerView: UIPickerView, numberOfRowsInComponent component: Int) -> Int {
+        return businessIDs.count
+    }
+    
+    func pickerView(_ pickerView: UIPickerView, titleForRow row: Int, forComponent component: Int) -> String? {
+        return businessIDs[row]
+    }
+    
+    func pickerView(_ pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int) {
+        // Update the label or selected provider field
+        userProfileView.currentProviderLabel.text = "Selected Provider: \(businessIDs[row])"
+    }
+
     func showAlert(message: String, completion: (() -> Void)? = nil) {
         let alertController = UIAlertController(title: nil, message: message, preferredStyle: .alert)
         alertController.addAction(UIAlertAction(title: "OK", style: .default) { _ in
@@ -83,10 +125,10 @@ class UserProfileController: UIViewController, UIImagePickerControllerDelegate, 
     private func decodeBase64ToImage(base64String: String) {
         if let imageData = Data(base64Encoded: base64String, options: .ignoreUnknownCharacters),
            let image = UIImage(data: imageData) {
-            print("Decoding Image")
             userProfileView.profileImageView.image = image
         }
     }
+    
     @objc private func onUpdateImageTapped() {
         let alert = UIAlertController(title: "Select Photo Source", message: nil, preferredStyle: .actionSheet)
         alert.addAction(UIAlertAction(title: "Camera", style: .default, handler: { _ in
@@ -189,8 +231,7 @@ class UserProfileController: UIViewController, UIImagePickerControllerDelegate, 
     @objc private func onUpdateProfileTapped() {
         let updatedData: [String: Any] = [
             "name": userProfileView.fullNameField.text ?? "",
-            "email": userProfileView.emailField.text ?? "",
-            "userType": userProfileView.currentProviderLabel.text?.replacingOccurrences(of: "Current Provider: ", with: "") ?? "",
+            "linkedInsurers": [],
         ]
         
         self.authHelper.updateUserData(data: updatedData) { [weak self] result in
@@ -203,11 +244,5 @@ class UserProfileController: UIViewController, UIImagePickerControllerDelegate, 
                 }
             }
         }
-    }
-
-    private func showAlert(message: String) {
-        let alertController = UIAlertController(title: nil, message: message, preferredStyle: .alert)
-        alertController.addAction(UIAlertAction(title: "OK", style: .default))
-        present(alertController, animated: true)
     }
 }
