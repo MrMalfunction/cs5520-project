@@ -37,7 +37,7 @@ class HospitalHSController: UIViewController {
 
     // MARK: - Data Fetching
     private func fetchPatients() {
-        firestoreHelpers.fetchAllPatientsDetails { [weak self] result in
+        firestoreHelpers.fetchCurrentHopsPatientsDetails { [weak self] result in
             guard let self = self else { return }
 
             DispatchQueue.main.async {

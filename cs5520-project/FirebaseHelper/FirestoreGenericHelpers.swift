@@ -127,6 +127,59 @@ class FirestoreGenericHelpers {
         }
     }
     
+//    func fetchAvailableHospitalNames(completion: @escaping (Result<[String], Error>) -> Void) {
+//        // Fetch the current user's document first
+//        let userRef = users_db.document(self.user_id) // `self.user_id` should already hold the current user ID
+//        userRef.getDocument { userDocument, error in
+//            if let error = error {
+//                completion(.failure(error))
+//                return
+//            }
+//            
+//            // Ensure the user document exists
+//            guard let userData = userDocument?.data(),
+//                  let linkedHospitals = userData["linkedHospitals"] as? [String] else {
+//                completion(.failure(NSError(
+//                    domain: "FirestoreError",
+//                    code: -2,
+//                    userInfo: [NSLocalizedDescriptionKey: "Unable to retrieve linked hospitals for the user."]
+//                )))
+//                return
+//            }
+//            
+//            // Now query for hospitals
+//            self.users_db.whereField("userType", isEqualTo: "Hospital").getDocuments { querySnapshot, error in
+//                if let error = error {
+//                    completion(.failure(error))
+//                    return
+//                }
+//                
+//                // Ensure the snapshot is valid
+//                guard let snapshot = querySnapshot else {
+//                    completion(.failure(NSError(
+//                        domain: "FirestoreError",
+//                        code: -1,
+//                        userInfo: [NSLocalizedDescriptionKey: "No hospitals found"]
+//                    )))
+//                    return
+//                }
+//                
+//                // Filter out hospitals already in the `linkedHospitals` array
+//                var availableHospitals: [String] = []
+//                for document in snapshot.documents {
+//                    if let hospitalName = document.data()["name"] as? String,
+//                       !linkedHospitals.contains(hospitalName) { // Check the `name` field against `linkedHospitals`
+//                        availableHospitals.append(hospitalName)
+//                    }
+//                }
+//
+//                
+//                // Return the filtered results
+//                completion(.success(availableHospitals))
+//            }
+//        }
+//    }
+    
     func fetchAvailableHospitalNames(completion: @escaping (Result<[String], Error>) -> Void) {
         // Fetch the current user's document first
         let userRef = users_db.document(self.user_id) // `self.user_id` should already hold the current user ID
@@ -136,18 +189,10 @@ class FirestoreGenericHelpers {
                 return
             }
             
-            // Ensure the user document exists
-            guard let userData = userDocument?.data(),
-                  let linkedHospitals = userData["linkedHospitals"] as? [String] else {
-                completion(.failure(NSError(
-                    domain: "FirestoreError",
-                    code: -2,
-                    userInfo: [NSLocalizedDescriptionKey: "Unable to retrieve linked hospitals for the user."]
-                )))
-                return
-            }
+            // Check if the user's document exists and try to retrieve linked hospitals
+            let linkedHospitals = (userDocument?.data()?["linkedHospitals"] as? [String]) ?? []
             
-            // Now query for hospitals
+            // Now query for all hospitals
             self.users_db.whereField("userType", isEqualTo: "Hospital").getDocuments { querySnapshot, error in
                 if let error = error {
                     completion(.failure(error))
@@ -164,21 +209,23 @@ class FirestoreGenericHelpers {
                     return
                 }
                 
-                // Filter out hospitals already in the `linkedHospitals` array
+                // Prepare the list of available hospitals
                 var availableHospitals: [String] = []
                 for document in snapshot.documents {
-                    if let hospitalName = document.data()["name"] as? String,
-                       !linkedHospitals.contains(hospitalName) { // Check the `name` field against `linkedHospitals`
-                        availableHospitals.append(hospitalName)
+                    if let hospitalName = document.data()["name"] as? String {
+                        // Add to the list only if it's not in linkedHospitals (or skip filtering if linkedHospitals is empty)
+                        if linkedHospitals.isEmpty || !linkedHospitals.contains(hospitalName) {
+                            availableHospitals.append(hospitalName)
+                        }
                     }
                 }
-
                 
                 // Return the filtered results
                 completion(.success(availableHospitals))
             }
         }
     }
+
     
     func addHospital(hospitalName: String, completion: @escaping (Result<Void, Error>) -> Void) {
         self.users_db.document(self.user_id).updateData([
@@ -293,7 +340,18 @@ class FirestoreGenericHelpers {
             }
     }
     
-    func fetchAllPatientsDetails(completion: @escaping (Result<[(name: String, email: String, profileImage: String, uid: String)], Error>) -> Void) {
+    func fetchCurrentHopsPatientsDetails(completion: @escaping (Result<[(name: String, email: String, profileImage: String, uid: String)], Error>) -> Void) {
+        // Get the current hospital username from UserDefaults
+        guard let currentHospitalUsername = UserDefaults.standard.string(forKey: "username") else {
+            completion(.failure(NSError(
+                domain: "UserError",
+                code: -1,
+                userInfo: [NSLocalizedDescriptionKey: "Current hospital username not found."]
+            )))
+            return
+        }
+
+        // Query for all users where userType is "Patient"
         self.users_db.whereField("userType", isEqualTo: "Patient").getDocuments(source: .server) { querySnapshot, error in
             if let error = error {
                 print("Error fetching patients: \(error.localizedDescription)")
@@ -312,19 +370,23 @@ class FirestoreGenericHelpers {
             }
 
             var patients: [(name: String, email: String, profileImage: String, uid: String)] = []
+
             for document in snapshot.documents {
                 if let name = document.data()["name"] as? String,
-                   let email = document.data()["email"] as? String {
+                   let email = document.data()["email"] as? String,
+                   let linkedHospitals = document.data()["linkedHospitals"] as? [String], // Check linked hospitals
+                   linkedHospitals.contains(currentHospitalUsername) { // Ensure the hospital is linked to the patient
                     let profileImage = document.data()["profileImage"] as? String ?? "DefaultProfileImageURL"
                     let uid = document.documentID
                     patients.append((name: name, email: email, profileImage: profileImage, uid: uid))
                 }
             }
 
-            print("Fetched \(patients.count) patients.")
+            print("Fetched \(patients.count) patients linked to \(currentHospitalUsername).")
             completion(.success(patients))
         }
     }
+
 
 
 
