@@ -386,6 +386,31 @@ class FirestoreGenericHelpers {
             completion(.success(patients))
         }
     }
+    
+    func fetchDetailsAdd_Contact(completion: @escaping (Result<[String: Any], Error>) -> Void) {
+        // Fetch the current user's document
+        let userRef = users_db.document(self.user_id) // `self.user_id` should already hold the current hospital's UID
+        userRef.getDocument { userDocument, error in
+            if let error = error {
+                completion(.failure(error))
+                return
+            }
+
+            // Ensure the document exists and retrieve its data
+            guard let document = userDocument, document.exists, let data = document.data() else {
+                completion(.failure(NSError(
+                    domain: "FirestoreError",
+                    code: -1,
+                    userInfo: [NSLocalizedDescriptionKey: "Details not found."]
+                )))
+                return
+            }
+
+            // Return the hospital data
+            completion(.success(data))
+        }
+    }
+
 
 
 

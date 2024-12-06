@@ -1,12 +1,18 @@
+//
+//  HospitalProfileView.swift
+//  cs5520-project
+//
+//  Created by Sumit Pagar on 12/2/24.
+//
 import UIKit
 
-class InsuranceProfileView: UIView {
+class HospitalProfileView: UIView {
 
     // MARK: - UI Components
     let profileImageView = UIImageView()
     let updateImageButton = UIButton(type: .system)
     let userIdField = UITextField()
-    let insuranceCompanyNameField = UITextField()
+    let hospitalNameField = UITextField()
     let emailField = UITextField()
     let addressField = UITextField()
     let contactInfoField = UITextField()
@@ -14,7 +20,7 @@ class InsuranceProfileView: UIView {
 
     // Labels for Text Fields
     let userIdLabel = UILabel()
-    let insuranceCompanyNameLabel = UILabel()
+    let hospitalNameLabel = UILabel()
     let emailLabel = UILabel()
     let addressLabel = UILabel()
     let contactInfoLabel = UILabel()
@@ -53,8 +59,8 @@ class InsuranceProfileView: UIView {
         // User ID Field (Disabled)
         setupTextField(userIdField, placeholder: "User ID (Disabled)", isEditable: false, label: userIdLabel)
 
-        // Insurance Company Name Field
-        setupTextField(insuranceCompanyNameField, placeholder: "Insurance Company Name", label: insuranceCompanyNameLabel)
+        // Hospital Name Field
+        setupTextField(hospitalNameField, placeholder: "Hospital Name", label: hospitalNameLabel)
 
         // Email Field (Disabled)
         setupTextField(emailField, placeholder: "Email Address", isEditable: false, label: emailLabel)
@@ -108,16 +114,16 @@ class InsuranceProfileView: UIView {
             userIdField.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -20),
             userIdField.heightAnchor.constraint(equalToConstant: 50),
 
-            insuranceCompanyNameLabel.topAnchor.constraint(equalTo: userIdField.bottomAnchor, constant: 20),
-            insuranceCompanyNameLabel.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 20),
-            insuranceCompanyNameLabel.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -20),
+            hospitalNameLabel.topAnchor.constraint(equalTo: userIdField.bottomAnchor, constant: 20),
+            hospitalNameLabel.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 20),
+            hospitalNameLabel.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -20),
 
-            insuranceCompanyNameField.topAnchor.constraint(equalTo: insuranceCompanyNameLabel.bottomAnchor, constant: 5),
-            insuranceCompanyNameField.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 20),
-            insuranceCompanyNameField.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -20),
-            insuranceCompanyNameField.heightAnchor.constraint(equalToConstant: 50),
+            hospitalNameField.topAnchor.constraint(equalTo: hospitalNameLabel.bottomAnchor, constant: 5),
+            hospitalNameField.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 20),
+            hospitalNameField.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -20),
+            hospitalNameField.heightAnchor.constraint(equalToConstant: 50),
 
-            emailLabel.topAnchor.constraint(equalTo: insuranceCompanyNameField.bottomAnchor, constant: 20),
+            emailLabel.topAnchor.constraint(equalTo: hospitalNameField.bottomAnchor, constant: 20),
             emailLabel.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 20),
             emailLabel.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -20),
 

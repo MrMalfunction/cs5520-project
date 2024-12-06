@@ -25,6 +25,7 @@ class HospitalHSController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         setupDelegates()
+        setupNavigationBar()
         fetchPatients()
     }
 
@@ -55,6 +56,40 @@ class HospitalHSController: UIViewController {
                 }
             }
         }
+    }
+    // Setup Navigation Bar
+    private func setupNavigationBar() {
+        title = "Insurance Home" // Main title in navigation bar
+
+        // Profile Button (Left)
+        let profileButton = UIBarButtonItem(
+            image: UIImage(systemName: "person.circle"),
+            style: .plain,
+            target: self,
+            action: #selector(onProfileButtonTapped)
+        )
+        navigationItem.leftBarButtonItem = profileButton
+
+        // Logout Button (Right)
+        let logoutButton = UIBarButtonItem(
+            title: "Logout",
+            style: .plain,
+            target: self,
+            action: #selector(onLogoutButtonTapped)
+        )
+        navigationItem.rightBarButtonItem = logoutButton
+    }
+
+    @objc private func onProfileButtonTapped() {
+        let profileController = HospitalProfileViewController()
+        navigationController?.pushViewController(profileController, animated: true)
+    }
+
+    @objc private func onLogoutButtonTapped() {
+        // Clear user session and navigate to login
+        UserDefaults.standard.removeObject(forKey: "uid")
+        UserDefaults.standard.removeObject(forKey: "userType")
+        navigationController?.popToRootViewController(animated: true)
     }
 
     // MARK: - Utility Methods

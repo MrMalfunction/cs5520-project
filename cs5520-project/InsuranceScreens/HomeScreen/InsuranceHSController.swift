@@ -37,7 +37,7 @@ class InsuranceHSController: UIViewController {
     }
 
     @objc private func onProfileButtonTapped() {
-        let profileController = InsuranceProfileController()
+        let profileController = InsuranceProfileViewController()
         navigationController?.pushViewController(profileController, animated: true)
     }
 
