@@ -13,7 +13,6 @@ class AuthHelper {
     private let users_db: FirebaseFirestore.CollectionReference
     private var user_id: String
     private let medicalRecordsDB: CollectionReference
-    private let accessRequestsDB: CollectionReference
     
     private let hospitalRecords: CollectionReference
     private let insurersRecords: CollectionReference
@@ -22,7 +21,6 @@ class AuthHelper {
         self.user_id = UserDefaults.standard.string(forKey: "uid") ?? ""
         self.users_db = db.collection("users")
         self.medicalRecordsDB = db.collection("medicalRecords")
-        self.accessRequestsDB = db.collection("accessRequests")
         
         self.hospitalRecords = db.collection("hospitalRecords")
         self.insurersRecords = db.collection("insurersRecords")
@@ -225,73 +223,6 @@ class AuthHelper {
                 }
             }
         }
-        
-        // Grant access to hospital
-        func grantAccessToHospital(hospitalCode: String, requestType: String, completion: @escaping (Result<Void, Error>) -> Void) {
-            guard !user_id.isEmpty else {
-                completion(.failure(NSError(domain: "", code: 401, userInfo: [NSLocalizedDescriptionKey: "User not logged in."])))
-                return
-            }
-            
-            let accessData: [String: Any] = [
-                "approvedByPatient": true,
-                "patientId": user_id,
-                "requestType": requestType,
-                "requestedBy": hospitalCode,
-                "status": "approved",
-                "timestamp": FieldValue.serverTimestamp()
-            ]
-            
-            // Save access request to Firestore
-            accessRequestsDB.document().setData(accessData) { error in
-                if let error = error {
-                    completion(.failure(error))
-                } else {
-                    completion(.success(()))
-                }
-            }
-        }
-        
-        
-        // Fetch hospitals granted access
-        func fetchGrantedAccess(completion: @escaping (Result<[[String: Any]], Error>) -> Void) {
-            let userId = UserDefaults.standard.string(forKey: "uid") ?? ""
-            accessRequestsDB.whereField("patientId", isEqualTo: userId)
-                .whereField("approvedByPatient", isEqualTo: true)
-                .getDocuments { snapshot, error in
-                    if let error = error {
-                        completion(.failure(error))
-                        return
-                    }
-                    let hospitals = snapshot?.documents.compactMap { $0.data() } ?? []
-                    completion(.success(hospitals))
-                }
-        }
-        
-        // Revoke access for a hospital
-        func revokeAccess(hospitalId: String, completion: @escaping (Result<Void, Error>) -> Void) {
-            let userId = UserDefaults.standard.string(forKey: "uid") ?? ""
-            accessRequestsDB.whereField("patientId", isEqualTo: userId)
-                .whereField("requestedBy", isEqualTo: hospitalId)
-                .getDocuments { snapshot, error in
-                    if let error = error {
-                        completion(.failure(error))
-                        return
-                    }
-                    guard let document = snapshot?.documents.first else {
-                        completion(.failure(NSError(domain: "", code: 404, userInfo: [NSLocalizedDescriptionKey: "Record not found."])))
-                        return
-                    }
-                    document.reference.updateData(["approvedByPatient": false, "status": "revoked"]) { error in
-                        if let error = error {
-                            completion(.failure(error))
-                        } else {
-                            completion(.success(()))
-                        }
-                    }
-                }
-        }
-        
         
         // Fetch user data
         func fetchUserData( completion: @escaping (Result<[UserProfileKey: Any], Error>) -> Void) {

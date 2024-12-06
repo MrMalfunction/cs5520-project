@@ -24,3 +24,11 @@ enum UserProfileKey: String {
         }
     }
 }
+
+struct MedicalRecord {
+    let enteredBy: String
+    let patientId: String
+    let recordType: String
+    let timestamp: String
+    let value: String
+}

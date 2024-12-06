@@ -31,6 +31,7 @@ class PatientHSController: UIViewController {
     private func setupBindings() {
         // Add action to the buttons
         customView.addMedicalRecordButton.addTarget(self, action: #selector(onAddMedicalRecordTapped), for: .touchUpInside)
+        customView.viewMedicalRecordButton.addTarget(self, action: #selector(onViewMedicalRecordTapped), for: .touchUpInside)
         customView.provideAccessButton.addTarget(self, action: #selector(onProvideAccessTapped), for: .touchUpInside)
         customView.reviewAccessButton.addTarget(self, action: #selector(onReviewAccessTapped), for: .touchUpInside)
     }
@@ -50,8 +51,14 @@ class PatientHSController: UIViewController {
 
     @objc private func onAddMedicalRecordTapped() {
         // Navigate to the Add Medical Record screen
-        let addMedicalRecordController = AddPatientRecordController()
+        let addMedicalRecordController = AddMedicalRecordScreenController()
         navigationController?.pushViewController(addMedicalRecordController, animated: true)
+    }
+    
+    @objc private func onViewMedicalRecordTapped() {
+        // Navigate to the View Medical Record screen
+        let viewMedicalRecordController = ViewMedicalRecordsController()
+        navigationController?.pushViewController(viewMedicalRecordController, animated: true)
     }
     
     @objc private func onProvideAccessTapped() {
