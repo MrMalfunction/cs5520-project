@@ -292,6 +292,41 @@ class FirestoreGenericHelpers {
                 completion(.success(medicalRecords))
             }
     }
+    
+    func fetchAllPatientsDetails(completion: @escaping (Result<[(name: String, email: String, profileImage: String, uid: String)], Error>) -> Void) {
+        self.users_db.whereField("userType", isEqualTo: "Patient").getDocuments(source: .server) { querySnapshot, error in
+            if let error = error {
+                print("Error fetching patients: \(error.localizedDescription)")
+                completion(.failure(error))
+                return
+            }
+
+            guard let snapshot = querySnapshot else {
+                print("No patients found.")
+                completion(.failure(NSError(
+                    domain: "FirestoreError",
+                    code: -1,
+                    userInfo: [NSLocalizedDescriptionKey: "No patients found"]
+                )))
+                return
+            }
+
+            var patients: [(name: String, email: String, profileImage: String, uid: String)] = []
+            for document in snapshot.documents {
+                if let name = document.data()["name"] as? String,
+                   let email = document.data()["email"] as? String {
+                    let profileImage = document.data()["profileImage"] as? String ?? "DefaultProfileImageURL"
+                    let uid = document.documentID
+                    patients.append((name: name, email: email, profileImage: profileImage, uid: uid))
+                }
+            }
+
+            print("Fetched \(patients.count) patients.")
+            completion(.success(patients))
+        }
+    }
+
+
 
 
 }

@@ -11,6 +11,8 @@ class UserProfileController: UIViewController, UIImagePickerControllerDelegate, 
     private let activityIndicator = UIActivityIndicatorView(style: .large)
     private var businessIDs: [String] = [] // Store fetched business IDs
     
+
+    
     override func loadView() {
         view = userProfileView
     }
@@ -22,6 +24,7 @@ class UserProfileController: UIViewController, UIImagePickerControllerDelegate, 
         setupActions()
         setupActivityIndicator()
         configurePickerView()
+        setupPickerWithToolbar()
         fetchBusinessIDsAndPopulatePicker() // Fetch and populate picker data
     }
     
@@ -46,7 +49,10 @@ class UserProfileController: UIViewController, UIImagePickerControllerDelegate, 
     
     private func configurePickerView() {
         userProfileView.insuranceProviderPicker.delegate = self
+        userProfileView.insuranceProviderPicker.dataSource = self
     }
+    
+
     
     private func fetchBusinessIDsAndPopulatePicker() {
         firestoreHelper.fetchBusinessIDsForInsuranceCompanies { [weak self] result in
@@ -64,6 +70,33 @@ class UserProfileController: UIViewController, UIImagePickerControllerDelegate, 
             }
         }
     }
+    
+    private func setupPickerWithToolbar() {
+        let toolbar = UIToolbar()
+        toolbar.sizeToFit()
+
+        // Create a Done button
+        let doneButton = UIBarButtonItem(title: "Done", style: .done, target: self, action: #selector(donePicker))
+        let flexibleSpace = UIBarButtonItem(barButtonSystemItem: .flexibleSpace, target: nil, action: nil)
+
+        toolbar.setItems([flexibleSpace, doneButton], animated: false)
+
+        // Set the toolbar as the accessory view for the text field
+        userProfileView.insuranceProviderCodeField.inputAccessoryView = toolbar
+        userProfileView.insuranceProviderCodeField.inputView = userProfileView.insuranceProviderPicker
+    }
+
+    @objc private func donePicker() {
+        let selectedRow = userProfileView.insuranceProviderPicker.selectedRow(inComponent: 0)
+        if businessIDs.indices.contains(selectedRow) {
+            let selectedProvider = businessIDs[selectedRow]
+            userProfileView.insuranceProviderCodeField.text = selectedProvider
+            userProfileView.currentProviderLabel.text = "Selected Provider: \(selectedProvider)"
+        }
+        // Dismiss the picker
+        userProfileView.insuranceProviderCodeField.resignFirstResponder()
+    }
+
     
     // MARK: - UIPickerViewDelegate & UIPickerViewDataSource
     func numberOfComponents(in pickerView: UIPickerView) -> Int {
@@ -246,3 +279,5 @@ class UserProfileController: UIViewController, UIImagePickerControllerDelegate, 
         }
     }
 }
+
+
