@@ -15,11 +15,17 @@ class FirestoreGenericHelpers {
     private let medicalRecordsDB: CollectionReference
     private let accessRequestsDB: CollectionReference
     
+    private let hospitalRecords: CollectionReference
+    private let insurersRecords: CollectionReference
+    
     init() {
         self.user_id = UserDefaults.standard.string(forKey: "uid") ?? ""
         self.users_db = db.collection("users")
         self.medicalRecordsDB = db.collection("medicalRecords")
         self.accessRequestsDB = db.collection("accessRequests")
+        
+        self.hospitalRecords = db.collection("hospitalRecords")
+        self.insurersRecords = db.collection("insurersRecords")
     }
     
     func saveProfileImageToFirestore(image: UIImage, completion: @escaping (Error?) -> Void) {
@@ -68,9 +74,34 @@ class FirestoreGenericHelpers {
             }
     }
     
-    func removeHospitalFromUser(_ hospital: String, completion: @escaping (Result<Void, Error>) -> Void) {
-        
-        // TODO: Remove user id from hospital collection too
+    func removeHospitalFromUser (hospital: String, completion: @escaping (Result<Void, Error>) -> Void) {
+                
+        self.db.collection("hospitalRecords")
+            .whereField("name", isEqualTo: hospital)
+            .getDocuments { (querySnapshot, error) in
+                if let error = error {
+                    print("Error fetching documents: \(error)")
+                    return
+                }
+                
+                guard let documents = querySnapshot?.documents, !documents.isEmpty else {
+                    print("No document found with the name 'Hosp1'.")
+                    return
+                }
+                
+                for document in documents {
+                    document.reference.updateData([
+                        "linkedPatients": FieldValue.arrayRemove([self.user_id])
+                    ]) { error in
+                        if let error = error {
+                            print("Error updating document: \(error)")
+                        } else {
+                            print("Successfully removed \(self.user_id) from linkedPatients if it existed.")
+                        }
+                    }
+                }
+            }
+
         
         let userRef = users_db.document(self.user_id)
         
@@ -151,5 +182,43 @@ class FirestoreGenericHelpers {
             }
         }
     }
+    
+    func addHospital(hospitalName: String, completion: @escaping (Result<Void, Error>) -> Void) {
+        self.users_db.document(self.user_id).updateData([
+            "linkedHospitals": FieldValue.arrayUnion([hospitalName])
+        ]) { error in
+            if let error = error {
+                completion(.failure(error))
+                return
+            }
+            
+            // Step 2: Add the user ID to the linkedPatients array in the hospital's document
+            self.hospitalRecords.whereField("name", isEqualTo: hospitalName).getDocuments { querySnapshot, error in
+                if let error = error {
+                    completion(.failure(error))
+                    return
+                }
+                
+                guard let documents = querySnapshot?.documents, !documents.isEmpty else {
+                    print("No hospital found with the name \(hospitalName).")
+                    completion(.failure(NSError(domain: "HospitalNotFound", code: 404, userInfo: [NSLocalizedDescriptionKey: "No hospital found with the name \(hospitalName)."])))
+                    return
+                }
+                
+                // Assuming only one hospital matches the name
+                let hospitalDocument = documents.first
+                hospitalDocument?.reference.updateData([
+                    "linkedPatients": FieldValue.arrayUnion([self.user_id])
+                ]) { error in
+                    if let error = error {
+                        completion(.failure(error))
+                    } else {
+                        completion(.success(()))
+                    }
+                }
+            }
+        }
+    }
+
 
 }

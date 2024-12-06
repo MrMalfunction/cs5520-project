@@ -34,7 +34,7 @@ class ReviewHospitalAccessController: UIViewController {
         let hospitalToDelete = self.items[indexPath.row]
         print("DELETE CALLED ON \(hospitalToDelete)")
         
-        self.firestoreHelper.removeHospitalFromUser(hospitalToDelete) { [weak self] result in
+        self.firestoreHelper.removeHospitalFromUser(hospital: hospitalToDelete) { [weak self] result in
             DispatchQueue.main.async {
                 switch result {
                 case .success:

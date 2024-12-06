@@ -69,8 +69,30 @@ class ProvideHospitalAccessController: UIViewController {
     private func addHospital(at indexPath: IndexPath) {
         let hospital = items[indexPath.row]
         print("Adding hospital access for \(hospital)")
-        // Logic to add hospital access (e.g., update Firebase)
+        
+        // Call the addHospital function from FirestoreGenericHelpers
+        firestoreHelpers.addHospital(hospitalName: hospital) { [weak self] result in
+            guard let self = self else { return }
+            
+            DispatchQueue.main.async {
+                switch result {
+                case .success():
+                    // Remove the hospital from the data source
+                    self.items.remove(at: indexPath.row)
+                    
+                    // Update the table view
+                    self.provideHospitalAccessView.tableView.deleteRows(at: [indexPath], with: .automatic)
+                    
+                    // Show success alert
+                    self.showAlert(message: "Successfully added access for \(hospital).")
+                case .failure(let error):
+                    // Show failure alert
+                    self.showAlert(message: "Failed to add access for \(hospital): \(error.localizedDescription)")
+                }
+            }
+        }
     }
+
 }
 
 extension ProvideHospitalAccessController: UITableViewDataSource, UITableViewDelegate {
