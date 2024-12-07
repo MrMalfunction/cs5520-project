@@ -23,10 +23,19 @@ class ViewMedicalRecordsController: UIViewController, UITableViewDelegate, UITab
         viewMedicalRecordsView.tableView.delegate = self
         viewMedicalRecordsView.tableView.dataSource = self
         
+        let tapRecognizer = UITapGestureRecognizer(target: self, action: #selector(hideKeyboardOnTap))
+        tapRecognizer.cancelsTouchesInView = false
+        view.addGestureRecognizer(tapRecognizer)
+        
         // Fetch medical records
         fetchMedicalRecords()
     }
 
+    
+    @objc func hideKeyboardOnTap(){
+        //MARK: removing the keyboard from screen...
+        view.endEditing(true)
+    }
     // TableView DataSource Methods
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return medicalRecords.count

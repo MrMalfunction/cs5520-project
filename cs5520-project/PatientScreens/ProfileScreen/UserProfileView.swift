@@ -3,6 +3,7 @@ import UIKit
 class UserProfileView: UIView, UIPickerViewDataSource, UIPickerViewDelegate {
     
     // MARK: - UI Components
+    var contentWrapper:UIScrollView!
     let profileImageView = UIImageView()
     let updateImageButton = UIButton(type: .system)
     let userIdField = UITextField()
@@ -50,9 +51,16 @@ class UserProfileView: UIView, UIPickerViewDataSource, UIPickerViewDelegate {
         }
     }
     
+    func setupContentWrapper(){
+        contentWrapper = UIScrollView()
+        contentWrapper.translatesAutoresizingMaskIntoConstraints = false
+        self.addSubview(contentWrapper)
+    }
+    
     // MARK: - Initializers
     override init(frame: CGRect) {
         super.init(frame: frame)
+        setupContentWrapper()
         setupViews()
         setupConstraints()
         setupTextFieldObservations()
@@ -75,13 +83,13 @@ class UserProfileView: UIView, UIPickerViewDataSource, UIPickerViewDelegate {
         profileImageView.layer.borderColor = UIColor.lightGray.cgColor
         profileImageView.backgroundColor = .lightGray
         profileImageView.translatesAutoresizingMaskIntoConstraints = false
-        addSubview(profileImageView)
+        contentWrapper.addSubview(profileImageView)
         
         // Update Image Button
         updateImageButton.setTitle("Update Image", for: .normal)
         updateImageButton.setTitleColor(.systemBlue, for: .normal)
         updateImageButton.translatesAutoresizingMaskIntoConstraints = false
-        addSubview(updateImageButton)
+        contentWrapper.addSubview(updateImageButton)
         
         // User ID Field (Disabled)
         setupTextField(userIdField, placeholder: "User ID (Disabled)", isEditable: false, label: userIdLabel)
@@ -97,19 +105,19 @@ class UserProfileView: UIView, UIPickerViewDataSource, UIPickerViewDelegate {
         dobPickerLabel.textColor = .darkGray
         dobPickerLabel.font = UIFont.systemFont(ofSize: 16)
         dobPickerLabel.translatesAutoresizingMaskIntoConstraints = false
-        addSubview(dobPickerLabel)
+        contentWrapper.addSubview(dobPickerLabel)
         
         dobPicker.datePickerMode = .date
         dobPicker.preferredDatePickerStyle = .wheels
         dobPicker.translatesAutoresizingMaskIntoConstraints = false
         dobPicker.addTarget(self, action: #selector(didChangeDOB), for: .valueChanged)
-        addSubview(dobPicker)
+        contentWrapper.addSubview(dobPicker)
         
         setupPicker(genderPicker)
         setupPicker(bloodGroupPicker)
         
-        addSubview(genderPicker)
-        addSubview(bloodGroupPicker)
+        contentWrapper.addSubview(genderPicker)
+        contentWrapper.addSubview(bloodGroupPicker)
         
         // Current Provider Label
         currentProviderLabel.text = "Current Provider Name"
@@ -117,7 +125,7 @@ class UserProfileView: UIView, UIPickerViewDataSource, UIPickerViewDelegate {
         currentProviderLabel.font = UIFont.systemFont(ofSize: 16)
         currentProviderLabel.translatesAutoresizingMaskIntoConstraints = false
         
-        addSubview(currentProviderLabel)
+        contentWrapper.addSubview(currentProviderLabel)
         
         // Insurance Provider Code Field (Dropdown)
         setupTextField(insuranceProviderCodeField, placeholder: "Select Insurance Provider", label: insuranceProviderCodeLabel)
@@ -129,7 +137,7 @@ class UserProfileView: UIView, UIPickerViewDataSource, UIPickerViewDelegate {
         updateButton.setTitleColor(.white, for: .normal)
         updateButton.layer.cornerRadius = 8
         updateButton.translatesAutoresizingMaskIntoConstraints = false
-        addSubview(updateButton)
+        contentWrapper.addSubview(updateButton)
     }
     
     private func setupPicker(_ picker: UIPickerView) {
@@ -148,9 +156,9 @@ class UserProfileView: UIView, UIPickerViewDataSource, UIPickerViewDelegate {
         label.font = UIFont.systemFont(ofSize: 12)
         label.textColor = .gray
         label.translatesAutoresizingMaskIntoConstraints = false
-        addSubview(label)
+        contentWrapper.addSubview(label)
         
-        addSubview(textField)
+        contentWrapper.addSubview(textField)
     }
     
     private func setupTextFieldObservations() {
@@ -239,13 +247,19 @@ class UserProfileView: UIView, UIPickerViewDataSource, UIPickerViewDelegate {
     // MARK: - Setup Constraints
     private func setupConstraints() {
         NSLayoutConstraint.activate([
-            profileImageView.topAnchor.constraint(equalTo: safeAreaLayoutGuide.topAnchor, constant: 20),
-            profileImageView.centerXAnchor.constraint(equalTo: centerXAnchor),
+            
+            contentWrapper.topAnchor.constraint(equalTo: self.safeAreaLayoutGuide.topAnchor),
+            contentWrapper.leadingAnchor.constraint(equalTo: self.safeAreaLayoutGuide.leadingAnchor),
+            contentWrapper.widthAnchor.constraint(equalTo:self.safeAreaLayoutGuide.widthAnchor),
+            contentWrapper.heightAnchor.constraint(equalTo: self.safeAreaLayoutGuide.heightAnchor),
+            
+            profileImageView.topAnchor.constraint(equalTo: contentWrapper.topAnchor, constant: 20),
+            profileImageView.centerXAnchor.constraint(equalTo: contentWrapper.centerXAnchor),
             profileImageView.widthAnchor.constraint(equalToConstant: 100),
             profileImageView.heightAnchor.constraint(equalToConstant: 100),
             
             updateImageButton.topAnchor.constraint(equalTo: profileImageView.bottomAnchor, constant: 10),
-            updateImageButton.centerXAnchor.constraint(equalTo: centerXAnchor),
+            updateImageButton.centerXAnchor.constraint(equalTo: contentWrapper.centerXAnchor),
             
             userIdLabel.topAnchor.constraint(equalTo: updateImageButton.bottomAnchor, constant: 20),
             userIdLabel.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 20),
@@ -311,7 +325,8 @@ class UserProfileView: UIView, UIPickerViewDataSource, UIPickerViewDelegate {
             updateButton.topAnchor.constraint(equalTo: insuranceProviderCodeField.bottomAnchor, constant: 20),
             updateButton.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 20),
             updateButton.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -20),
-            updateButton.heightAnchor.constraint(equalToConstant: 50)
+            updateButton.heightAnchor.constraint(equalToConstant: 50),
+            updateButton.bottomAnchor.constraint(equalTo: contentWrapper.bottomAnchor),
         ])
     }
 }

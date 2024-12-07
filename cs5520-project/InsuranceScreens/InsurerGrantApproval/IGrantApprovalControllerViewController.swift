@@ -17,10 +17,18 @@ class IGrantApprovalController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        let tapRecognizer = UITapGestureRecognizer(target: self, action: #selector(hideKeyboardOnTap))
+        tapRecognizer.cancelsTouchesInView = false
+        view.addGestureRecognizer(tapRecognizer)
         view.backgroundColor = .white
         title = "Grant Approval"
         setupDelegates()
         getApprovalRequests(insurerName: insurerName ?? "", patientId: patientId ?? "")
+    }
+    
+    @objc func hideKeyboardOnTap(){
+        //MARK: removing the keyboard from screen...
+        view.endEditing(true)
     }
 
     private func setupDelegates() {

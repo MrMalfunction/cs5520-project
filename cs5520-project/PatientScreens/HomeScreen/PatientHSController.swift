@@ -16,11 +16,20 @@ class PatientHSController: UIViewController {
         setupBindings()
         self.navigationItem.hidesBackButton = true
         setupNavigationBar()
+        
+        let tapRecognizer = UITapGestureRecognizer(target: self, action: #selector(hideKeyboardOnTap))
+        tapRecognizer.cancelsTouchesInView = false
+        view.addGestureRecognizer(tapRecognizer)
         // Set up button actions
         customView.provideAccessButton.addTarget(self, action: #selector(onProvideAccessTapped), for: .touchUpInside)
 //        customView.userPhotoButton.addTarget(self, action: #selector(onUserPhotoTapped), for: .touchUpInside)
     }
 
+    
+    @objc func hideKeyboardOnTap(){
+        //MARK: removing the keyboard from screen...
+        view.endEditing(true)
+    }
     // MARK: - Private Methods
     private func setupBindings() {
         // Add action to the buttons

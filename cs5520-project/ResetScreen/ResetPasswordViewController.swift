@@ -10,7 +10,15 @@ class ResetPasswordViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         view = resetPasswordView
+        let tapRecognizer = UITapGestureRecognizer(target: self, action: #selector(hideKeyboardOnTap))
+        tapRecognizer.cancelsTouchesInView = false
+        view.addGestureRecognizer(tapRecognizer)
         resetPasswordView.resetButton.addTarget(self, action: #selector(didTapResetButton), for: .touchUpInside)
+    }
+    
+    @objc func hideKeyboardOnTap(){
+        //MARK: removing the keyboard from screen...
+        view.endEditing(true)
     }
     
     // MARK: - Reset Button Action

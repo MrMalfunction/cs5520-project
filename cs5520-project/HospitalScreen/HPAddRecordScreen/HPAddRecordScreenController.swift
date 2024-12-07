@@ -31,6 +31,14 @@ class HPAddRecordScreenController: UIViewController, UIPickerViewDelegate, UIPic
 
         // Set up Save Button Action
         hpaddRecordView.saveButton.addTarget(self, action: #selector(saveButtonTapped), for: .touchUpInside)
+        let tapRecognizer = UITapGestureRecognizer(target: self, action: #selector(hideKeyboardOnTap))
+        tapRecognizer.cancelsTouchesInView = false
+        view.addGestureRecognizer(tapRecognizer)
+    }
+    
+    @objc func hideKeyboardOnTap(){
+        //MARK: removing the keyboard from screen...
+        view.endEditing(true)
     }
     
     // PickerView Delegate & DataSource Methods

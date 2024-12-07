@@ -22,12 +22,21 @@ class IPViewMedicalRecordsController: UIViewController, UITableViewDelegate, UIT
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        let tapRecognizer = UITapGestureRecognizer(target: self, action: #selector(hideKeyboardOnTap))
+        tapRecognizer.cancelsTouchesInView = false
+        view.addGestureRecognizer(tapRecognizer)
+        
         // Set table view delegate and data source
         ipviewMedicalRecordsView.tableView.delegate = self
         ipviewMedicalRecordsView.tableView.dataSource = self
         setupActions()
         // Fetch medical records
         fetchMedicalRecords(patientId: patientId)
+    }
+    
+    @objc func hideKeyboardOnTap(){
+        //MARK: removing the keyboard from screen...
+        view.endEditing(true)
     }
     
     private func setupActions() {

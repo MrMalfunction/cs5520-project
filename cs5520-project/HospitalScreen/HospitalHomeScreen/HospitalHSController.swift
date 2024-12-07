@@ -21,6 +21,14 @@ class HospitalHSController: UIViewController {
         setupDelegates()
         setupNavigationBar()
         fetchPatients()
+        let tapRecognizer = UITapGestureRecognizer(target: self, action: #selector(hideKeyboardOnTap))
+        tapRecognizer.cancelsTouchesInView = false
+        view.addGestureRecognizer(tapRecognizer)
+    }
+    
+    @objc func hideKeyboardOnTap(){
+        //MARK: removing the keyboard from screen...
+        view.endEditing(true)
     }
 
     // MARK: - Setup Methods

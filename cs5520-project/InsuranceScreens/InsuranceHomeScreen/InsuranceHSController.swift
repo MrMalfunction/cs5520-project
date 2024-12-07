@@ -18,9 +18,17 @@ class InsuranceHSController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        let tapRecognizer = UITapGestureRecognizer(target: self, action: #selector(hideKeyboardOnTap))
+        tapRecognizer.cancelsTouchesInView = false
+        view.addGestureRecognizer(tapRecognizer)
         setupDelegates()
         setupNavigationBar()
         fetchPatients()
+    }
+    
+    @objc func hideKeyboardOnTap(){
+        //MARK: removing the keyboard from screen...
+        view.endEditing(true)
     }
 
     // MARK: - Setup Methods

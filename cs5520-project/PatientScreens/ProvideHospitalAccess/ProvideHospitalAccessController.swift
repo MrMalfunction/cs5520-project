@@ -26,6 +26,9 @@ class ProvideHospitalAccessController: UIViewController {
         provideHospitalAccessView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
         view.addSubview(provideHospitalAccessView)
         
+        let tapRecognizer = UITapGestureRecognizer(target: self, action: #selector(hideKeyboardOnTap))
+        tapRecognizer.cancelsTouchesInView = false
+        view.addGestureRecognizer(tapRecognizer)
         // Set the table view's data source and delegate
         provideHospitalAccessView.tableView.dataSource = self
         provideHospitalAccessView.tableView.delegate = self
@@ -36,7 +39,10 @@ class ProvideHospitalAccessController: UIViewController {
         // Fetch data from Firestore
         fetchHospitals()
     }
-    
+    @objc func hideKeyboardOnTap(){
+        //MARK: removing the keyboard from screen...
+        view.endEditing(true)
+    }
     // Fetch hospitals using FirestoreGenericHelpers
     private func fetchHospitals() {
         firestoreHelpers.fetchAvailableHospitalNames { [weak self] result in

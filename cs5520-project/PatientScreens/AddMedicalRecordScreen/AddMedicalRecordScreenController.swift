@@ -20,6 +20,10 @@ class AddMedicalRecordScreenController: UIViewController, UIPickerViewDelegate, 
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        let tapRecognizer = UITapGestureRecognizer(target: self, action: #selector(hideKeyboardOnTap))
+        tapRecognizer.cancelsTouchesInView = false
+        view.addGestureRecognizer(tapRecognizer)
+        
         // Set Picker DataSource and Delegate
         addMedicalRecordView.recordTypePicker.delegate = self
         addMedicalRecordView.recordTypePicker.dataSource = self
@@ -30,6 +34,11 @@ class AddMedicalRecordScreenController: UIViewController, UIPickerViewDelegate, 
 
         // Set up Save Button Action
         addMedicalRecordView.saveButton.addTarget(self, action: #selector(saveButtonTapped), for: .touchUpInside)
+    }
+    
+    @objc func hideKeyboardOnTap(){
+        //MARK: removing the keyboard from screen...
+        view.endEditing(true)
     }
     
     // PickerView Delegate & DataSource Methods

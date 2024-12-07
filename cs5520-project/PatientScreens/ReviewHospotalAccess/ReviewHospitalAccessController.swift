@@ -25,8 +25,17 @@ class ReviewHospitalAccessController: UIViewController {
         // Set the title of the view controller
         self.title = "Hospital Access"
         
+        let tapRecognizer = UITapGestureRecognizer(target: self, action: #selector(hideKeyboardOnTap))
+        tapRecognizer.cancelsTouchesInView = false
+        view.addGestureRecognizer(tapRecognizer)
+        
         // Load data
         loadData()
+    }
+    
+    @objc func hideKeyboardOnTap(){
+        //MARK: removing the keyboard from screen...
+        view.endEditing(true)
     }
     
     // Action to be called when the "X" button is clicked

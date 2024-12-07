@@ -25,6 +25,15 @@ class UserProfileController: UIViewController, UIImagePickerControllerDelegate, 
         configurePickerView()
         setupPickerWithToolbar()
         fetchBusinessIDsAndPopulatePicker() // Fetch and populate picker data
+        
+        let tapRecognizer = UITapGestureRecognizer(target: self, action: #selector(hideKeyboardOnTap))
+        tapRecognizer.cancelsTouchesInView = false
+        view.addGestureRecognizer(tapRecognizer)
+    }
+    
+    @objc func hideKeyboardOnTap(){
+        //MARK: removing the keyboard from screen...
+        view.endEditing(true)
     }
     
     private func setupActivityIndicator() {
