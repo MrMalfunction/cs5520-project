@@ -45,7 +45,7 @@ class HospitalPatientCell: UITableViewCell {
         emailLabel.textColor = .darkGray
 
         // Hospitals Label
-        hospitalsLabel.font = .systemFont(ofSize: 12)
+        hospitalsLabel.font = .systemFont(ofSize: 14)
         hospitalsLabel.textColor = .gray
         hospitalsLabel.numberOfLines = 0
 

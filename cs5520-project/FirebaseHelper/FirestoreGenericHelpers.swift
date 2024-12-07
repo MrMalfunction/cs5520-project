@@ -325,14 +325,17 @@ class FirestoreGenericHelpers {
         }
     }
     
-    func addMedicalRecord(recordType: String, value: String, comments: String, enteredBy: String, completion: @escaping (Result<Void, Error>) -> Void) {
+    func addMedicalRecord(recordType: String, value: String, comments: String, enteredBy: String, patientId: String? = nil, completion: @escaping (Result<Void, Error>) -> Void) {
         // Get the current timestamp
         let timestamp = Timestamp(date: Date())
         
+        // Determine the patient ID to use
+        let targetPatientId = patientId ?? self.user_id
+
         // Prepare the data to be saved
         let recordData: [String: Any] = [
             "enteredBy": enteredBy,    // Who entered the record (e.g., "IfReq")
-            "patientId": self.user_id,  // Use the current user ID as patient ID
+            "patientId": targetPatientId,  // Use the provided patient ID or fallback to self.user_id
             "recordType": recordType,   // Type of the record (e.g., "Blood Glucose Level")
             "timestamp": timestamp,     // Current timestamp
             "value": value,             // The value for the medical record (e.g., "UserValue")
@@ -350,14 +353,18 @@ class FirestoreGenericHelpers {
     }
 
 
-    func fetchMedicalRecordsForPatient(completion: @escaping (Result<[MedicalRecord], Error>) -> Void) {
+
+    func fetchMedicalRecordsForPatient(patientId: String? = nil, completion: @escaping (Result<[MedicalRecord], Error>) -> Void) {
         // Create a DateFormatter to format the timestamp as a string
         let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "MMMM dd, yyyy at h:mm:ss a z" // Adjust the format as needed
-
-        // Query the medicalRecords collection to get all records where patientId equals self.user_id
+        dateFormatter.dateFormat = "MMMM dd, yyyy 'at' h:mm:ss a z" // Adjust the format as needed
+        
+        // Determine which patientId to use
+        let targetPatientId = patientId ?? self.user_id
+        
+        // Query the medicalRecords collection to get all records for the specified patientId
         medicalRecordsDB
-            .whereField("patientId", isEqualTo: self.user_id)
+            .whereField("patientId", isEqualTo: targetPatientId)
             .getDocuments { (querySnapshot, error) in
                 if let error = error {
                     completion(.failure(error))
@@ -388,6 +395,7 @@ class FirestoreGenericHelpers {
                         
                         // Fetch comments if they exist, or set to an empty string
                         let comments = data["comments"] as? String ?? ""
+                        print("tiemstamap is \(timestampString)")
                         
                         // Create a MedicalRecord object with the timestamp as a string
                         let record = MedicalRecord(
@@ -406,6 +414,7 @@ class FirestoreGenericHelpers {
                 completion(.success(medicalRecords))
             }
     }
+
 
     
     func fetchCurrentHopsPatientsDetails(completion: @escaping (Result<[(name: String, email: String, profileImage: String, uid: String, linkedHospitals: [String])], Error>) -> Void) {

@@ -147,24 +147,17 @@ extension HospitalHSController: UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
         let patient = filteredPatients[indexPath.row]
-
-        // Example navigation logic (to be implemented as needed)
-        let patientDetailsVC = UIViewController()
-        patientDetailsVC.title = patient.name
-        patientDetailsVC.view.backgroundColor = .white
-
-        let detailsLabel = UILabel()
-        detailsLabel.text = "Email: \(patient.email)\nUID: \(patient.uid)"
-        detailsLabel.textAlignment = .center
-        detailsLabel.numberOfLines = 0
-        detailsLabel.translatesAutoresizingMaskIntoConstraints = false
-
-        patientDetailsVC.view.addSubview(detailsLabel)
-        NSLayoutConstraint.activate([
-            detailsLabel.centerXAnchor.constraint(equalTo: patientDetailsVC.view.centerXAnchor),
-            detailsLabel.centerYAnchor.constraint(equalTo: patientDetailsVC.view.centerYAnchor)
-        ])
-
-        navigationController?.pushViewController(patientDetailsVC, animated: true)
+        
+        // Initialize the HPViewMedicalRecordsController
+        let hsmedicalRecordsVC = HPViewMedicalRecordsController()
+        
+        // Pass the patient UID to the new controller
+        hsmedicalRecordsVC.patientId = patient.uid
+        hsmedicalRecordsVC.patientName = patient.name
+        print("------------------pid in HS---------------------\(hsmedicalRecordsVC.patientId)")
+        
+        // Push the new controller onto the navigation stack
+        navigationController?.pushViewController(hsmedicalRecordsVC, animated: true)
     }
 }
+
