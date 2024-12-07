@@ -12,9 +12,10 @@ class UserProfileView: UIView, UIPickerViewDataSource, UIPickerViewDelegate {
     let dobPicker = UIDatePicker()
     let genderPicker = UIPickerView()
     let bloodGroupPicker = UIPickerView()
-    
+    let dobPickerLabel = UILabel()
+
     // Data for Pickers
-    let genderOptions = ["M", "F", "-"]
+    let genderOptions = ["M", "F", "*"]
     let bloodGroupOptions = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"]
     
     // Selected Fields
@@ -89,7 +90,14 @@ class UserProfileView: UIView, UIPickerViewDataSource, UIPickerViewDelegate {
         setupTextField(fullNameField, placeholder: "User's Full Name", label: fullNameLabel)
         
         // Email Field (Disabled)
-        setupTextField(emailField, placeholder: "Email Address", isEditable: false, label: emailLabel)
+        setupTextField(emailField, placeholder: "Email Address (Disabled)", isEditable: false, label: emailLabel)
+        
+        // Current Provider Label
+        dobPickerLabel.text = "\t\tDate of Birth \t\t Gender \t Blood Group"
+        dobPickerLabel.textColor = .darkGray
+        dobPickerLabel.font = UIFont.systemFont(ofSize: 16)
+        dobPickerLabel.translatesAutoresizingMaskIntoConstraints = false
+        addSubview(dobPickerLabel)
         
         dobPicker.datePickerMode = .date
         dobPicker.preferredDatePickerStyle = .wheels
@@ -266,23 +274,28 @@ class UserProfileView: UIView, UIPickerViewDataSource, UIPickerViewDelegate {
             emailField.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -20),
             emailField.heightAnchor.constraint(equalToConstant: 50),
             
-            dobPicker.topAnchor.constraint(equalTo: emailField.bottomAnchor, constant: 5),
+            dobPickerLabel.topAnchor.constraint(equalTo: emailField.bottomAnchor, constant: -20),
+            dobPickerLabel.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 5),
+            dobPickerLabel.heightAnchor.constraint(equalToConstant: 90),
+//            dobPickerLabel.widthAnchor.constraint(equalToConstant: 180),
+            
+            dobPicker.topAnchor.constraint(equalTo: dobPickerLabel.bottomAnchor, constant: -25),
             dobPicker.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 5),
             dobPicker.heightAnchor.constraint(equalToConstant: 90),
             dobPicker.widthAnchor.constraint(equalToConstant: 180),
             
-            genderPicker.topAnchor.constraint(equalTo: emailField.bottomAnchor, constant: 5),
+            genderPicker.topAnchor.constraint(equalTo: dobPickerLabel.bottomAnchor, constant: -25),
             genderPicker.leadingAnchor.constraint(equalTo: dobPicker.trailingAnchor, constant: -15),
             genderPicker.heightAnchor.constraint(equalToConstant: 90),
             genderPicker.widthAnchor.constraint(equalToConstant: 60),
             
-            bloodGroupPicker.topAnchor.constraint(equalTo: emailField.bottomAnchor, constant: 5),
+            bloodGroupPicker.topAnchor.constraint(equalTo: dobPickerLabel.bottomAnchor, constant: -25),
             bloodGroupPicker.leadingAnchor.constraint(equalTo: genderPicker.trailingAnchor, constant: -15),
             bloodGroupPicker.widthAnchor.constraint(equalToConstant: 90),
             bloodGroupPicker.heightAnchor.constraint(equalToConstant: 90),
             bloodGroupPicker.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -5),
             
-            currentProviderLabel.topAnchor.constraint(equalTo: bloodGroupPicker.bottomAnchor, constant: 20),
+            currentProviderLabel.topAnchor.constraint(equalTo: bloodGroupPicker.bottomAnchor, constant: 0),
             currentProviderLabel.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 20),
             currentProviderLabel.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -20),
             
