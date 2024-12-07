@@ -1,19 +1,11 @@
-//
-//  HospitalHSView.swift
-//  cs5520-project
-//
-//  Created by Amol Bohora on 11/25/24.
-//
-
 import UIKit
 
-class HospitalHSView: UIView, UISearchBarDelegate, UITableViewDelegate{
-
+class HospitalHSView: UIView, UISearchBarDelegate, UITableViewDelegate {
 
     // MARK: - UI Elements
     let titleLabel: UILabel = {
         let label = UILabel()
-        label.text = "Hospital's Patient Records" // Main title
+        label.text = "Hospital Patient Records" // Main title
         label.font = .boldSystemFont(ofSize: 24)
         label.textAlignment = .center
         return label
@@ -26,19 +18,9 @@ class HospitalHSView: UIView, UISearchBarDelegate, UITableViewDelegate{
         return searchBar
     }()
 
-//    let hospitalDetailsButton: UIButton = {
-//        let button = UIButton(type: .system)
-//        button.setTitle("Hospital Details", for: .normal)
-//        button.titleLabel?.font = .boldSystemFont(ofSize: 18)
-//        button.setTitleColor(.white, for: .normal)
-//        button.backgroundColor = .black
-//        button.layer.cornerRadius = 8
-//        return button
-//    }()
-
     let tableView: UITableView = {
         let tableView = UITableView()
-        tableView.register(UITableViewCell.self, forCellReuseIdentifier: "HospitalCell")
+        tableView.register(HospitalPatientCell.self, forCellReuseIdentifier: "HospitalPatientCell") // Register custom cell here
         return tableView
     }()
 
@@ -61,14 +43,12 @@ class HospitalHSView: UIView, UISearchBarDelegate, UITableViewDelegate{
     private func setupViews() {
         addSubview(titleLabel)
         addSubview(searchBar)
-        //addSubview(hospitalDetailsButton)
         addSubview(tableView)
     }
 
     private func setupConstraints() {
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
         searchBar.translatesAutoresizingMaskIntoConstraints = false
-        //hospitalDetailsButton.translatesAutoresizingMaskIntoConstraints = false
         tableView.translatesAutoresizingMaskIntoConstraints = false
 
         NSLayoutConstraint.activate([
@@ -81,12 +61,6 @@ class HospitalHSView: UIView, UISearchBarDelegate, UITableViewDelegate{
             searchBar.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 20),
             searchBar.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -20),
 
-            // Hospital Details button constraints
-//            hospitalDetailsButton.centerXAnchor.constraint(equalTo: centerXAnchor),
-//            hospitalDetailsButton.topAnchor.constraint(equalTo: searchBar.bottomAnchor, constant: 20),
-//            hospitalDetailsButton.widthAnchor.constraint(equalToConstant: 200),
-//            hospitalDetailsButton.heightAnchor.constraint(equalToConstant: 50),
-
             // Table view constraints
             tableView.topAnchor.constraint(equalTo: searchBar.bottomAnchor, constant: 20),
             tableView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 20),
@@ -95,4 +69,3 @@ class HospitalHSView: UIView, UISearchBarDelegate, UITableViewDelegate{
         ])
     }
 }
-

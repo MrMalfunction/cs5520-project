@@ -1,10 +1,3 @@
-//
-//  HospitalHSController.swift
-//  cs5520-project
-//
-//  Created by Amol Bohora on 11/25/24.
-//
-
 import UIKit
 import FirebaseFirestore
 
@@ -12,8 +5,9 @@ class HospitalHSController: UIViewController {
 
     // MARK: - Properties
     private var hospitalView: HospitalHSView!
-    private var patients: [(name: String, email: String, profileImage: String, uid: String)] = [] // Data from Firestore
-    private var filteredPatients: [(name: String, email: String, profileImage: String, uid: String)] = [] // Filtered Data for Search
+    private var patients: [(name: String, email: String, profileImage: String, uid: String, linkedHospitals: [String])] = [] // Data from Firestore
+    private var filteredPatients: [(name: String, email: String, profileImage: String, uid: String, linkedHospitals: [String])] = [] // Filtered Data for Search
+
     private let firestoreHelpers = FirestoreGenericHelpers()
 
     // MARK: - Lifecycle
@@ -36,30 +30,8 @@ class HospitalHSController: UIViewController {
         hospitalView.tableView.dataSource = self
     }
 
-    // MARK: - Data Fetching
-    private func fetchPatients() {
-        firestoreHelpers.fetchCurrentHopsPatientsDetails { [weak self] result in
-            guard let self = self else { return }
-
-            DispatchQueue.main.async {
-                switch result {
-                case .success(let patients):
-                    if patients.isEmpty {
-                        self.showAlert(message: "No patients available at the moment.")
-                    } else {
-                        self.patients = patients
-                        self.filteredPatients = patients // Initialize filtered patients
-                        self.hospitalView.tableView.reloadData()
-                    }
-                case .failure(let error):
-                    self.showAlert(message: "Failed to fetch patients: \(error.localizedDescription)")
-                }
-            }
-        }
-    }
-    // Setup Navigation Bar
     private func setupNavigationBar() {
-        title = "Insurance Home" // Main title in navigation bar
+       
 
         // Profile Button (Left)
         let profileButton = UIBarButtonItem(
@@ -92,7 +64,37 @@ class HospitalHSController: UIViewController {
         navigationController?.popToRootViewController(animated: true)
     }
 
+    // MARK: - Data Fetching
+    private func fetchPatients() {
+        firestoreHelpers.fetchCurrentHopsPatientsDetails { [weak self] result in
+            guard let self = self else { return }
+
+            DispatchQueue.main.async {
+                switch result {
+                case .success(let patients):
+                    if patients.isEmpty {
+                        self.showAlert(message: "No patients available at the moment.")
+                    } else {
+                        self.patients = patients
+                        self.filteredPatients = patients // Initialize filtered patients
+                        self.hospitalView.tableView.reloadData()
+                    }
+                case .failure(let error):
+                    self.showAlert(message: "Failed to fetch patients: \(error.localizedDescription)")
+                }
+            }
+        }
+    }
+
     // MARK: - Utility Methods
+    private func decodeBase64ToImage(base64String: String) -> UIImage? {
+        if let imageData = Data(base64Encoded: base64String, options: .ignoreUnknownCharacters),
+           let image = UIImage(data: imageData) {
+            return image
+        }
+        return UIImage(named: "placeholder") // Default placeholder if decoding fails
+    }
+
     private func showAlert(message: String) {
         let alert = UIAlertController(title: "Alert", message: message, preferredStyle: .alert)
         alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
@@ -125,10 +127,16 @@ extension HospitalHSController: UITableViewDataSource {
     }
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "HospitalCell", for: indexPath)
+        guard let cell = tableView.dequeueReusableCell(withIdentifier: "HospitalPatientCell", for: indexPath) as? HospitalPatientCell else {
+            return UITableViewCell()
+        }
+
         let patient = filteredPatients[indexPath.row]
-        cell.textLabel?.text = "Name: \(patient.name) | Email: \(patient.email)"
-        cell.detailTextLabel?.text = patient.uid
+        let profileImage = decodeBase64ToImage(base64String: patient.profileImage)
+        let linkedHospitalsText = patient.linkedHospitals.joined(separator: ", ") // Combine linked hospitals into a string
+
+        cell.configure(name: patient.name, email: patient.email, hospitals: linkedHospitalsText, profileImage: profileImage)
+
         return cell
     }
 }

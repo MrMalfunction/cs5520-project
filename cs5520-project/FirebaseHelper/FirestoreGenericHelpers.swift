@@ -340,7 +340,7 @@ class FirestoreGenericHelpers {
             }
     }
     
-    func fetchCurrentHopsPatientsDetails(completion: @escaping (Result<[(name: String, email: String, profileImage: String, uid: String)], Error>) -> Void) {
+    func fetchCurrentHopsPatientsDetails(completion: @escaping (Result<[(name: String, email: String, profileImage: String, uid: String, linkedHospitals: [String])], Error>) -> Void) {
         // Get the current hospital username from UserDefaults
         guard let currentHospitalUsername = UserDefaults.standard.string(forKey: "username") else {
             completion(.failure(NSError(
@@ -369,7 +369,7 @@ class FirestoreGenericHelpers {
                 return
             }
 
-            var patients: [(name: String, email: String, profileImage: String, uid: String)] = []
+            var patients: [(name: String, email: String, profileImage: String, uid: String, linkedHospitals: [String])] = []
 
             for document in snapshot.documents {
                 if let name = document.data()["name"] as? String,
@@ -378,7 +378,9 @@ class FirestoreGenericHelpers {
                    linkedHospitals.contains(currentHospitalUsername) { // Ensure the hospital is linked to the patient
                     let profileImage = document.data()["profileImage"] as? String ?? "DefaultProfileImageURL"
                     let uid = document.documentID
-                    patients.append((name: name, email: email, profileImage: profileImage, uid: uid))
+                    let linkedHospitals = document.data()["linkedInsurers"] as? [String] ?? [] // Add linked hospitals
+
+                    patients.append((name: name, email: email, profileImage: profileImage, uid: uid, linkedHospitals: linkedHospitals))
                 }
             }
 
@@ -386,6 +388,55 @@ class FirestoreGenericHelpers {
             completion(.success(patients))
         }
     }
+    
+    func fetchCurrentInsurerPatientsDetails(completion: @escaping (Result<[(name: String, email: String, profileImage: String, uid: String, linkedHospitals: [String])], Error>) -> Void) {
+        // Get the current insurer username from UserDefaults
+        guard let currentInsurerUsername = UserDefaults.standard.string(forKey: "username") else {
+            completion(.failure(NSError(
+                domain: "UserError",
+                code: -1,
+                userInfo: [NSLocalizedDescriptionKey: "Current Insurer username not found."]
+            )))
+            return
+        }
+
+        // Query for all users where userType is "Patient"
+        self.users_db.whereField("userType", isEqualTo: "Patient").getDocuments(source: .server) { querySnapshot, error in
+            if let error = error {
+                print("Error fetching patients: \(error.localizedDescription)")
+                completion(.failure(error))
+                return
+            }
+
+            guard let snapshot = querySnapshot else {
+                print("No patients found.")
+                completion(.failure(NSError(
+                    domain: "FirestoreError",
+                    code: -1,
+                    userInfo: [NSLocalizedDescriptionKey: "No patients found"]
+                )))
+                return
+            }
+
+            var patients: [(name: String, email: String, profileImage: String, uid: String, linkedHospitals: [String])] = []
+
+            for document in snapshot.documents {
+                if let name = document.data()["name"] as? String,
+                   let email = document.data()["email"] as? String,
+                   let linkedInsurers = document.data()["linkedInsurers"] as? [String], // Check linked insurers
+                   linkedInsurers.contains(currentInsurerUsername) {
+                    let profileImage = document.data()["profileImage"] as? String ?? "DefaultProfileImageURL"
+                    let uid = document.documentID
+                    let linkedHospitals = document.data()["linkedHospitals"] as? [String] ?? [] // Add linked hospitals
+                    patients.append((name: name, email: email, profileImage: profileImage, uid: uid, linkedHospitals: linkedHospitals))
+                }
+            }
+
+            print("Fetched \(patients.count) patients linked to \(currentInsurerUsername).")
+            completion(.success(patients))
+        }
+    }
+
     
     func fetchDetailsAdd_Contact(completion: @escaping (Result<[String: Any], Error>) -> Void) {
         // Fetch the current user's document
