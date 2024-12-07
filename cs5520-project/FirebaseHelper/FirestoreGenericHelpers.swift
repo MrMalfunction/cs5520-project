@@ -325,7 +325,7 @@ class FirestoreGenericHelpers {
         }
     }
     
-    func addMedicalRecord(recordType: String, value: String, enteredBy: String, completion: @escaping (Result<Void, Error>) -> Void) {
+    func addMedicalRecord(recordType: String, value: String, comments: String, enteredBy: String, completion: @escaping (Result<Void, Error>) -> Void) {
         // Get the current timestamp
         let timestamp = Timestamp(date: Date())
         
@@ -335,7 +335,8 @@ class FirestoreGenericHelpers {
             "patientId": self.user_id,  // Use the current user ID as patient ID
             "recordType": recordType,   // Type of the record (e.g., "Blood Glucose Level")
             "timestamp": timestamp,     // Current timestamp
-            "value": value              // The value for the medical record (e.g., "UserValue")
+            "value": value,             // The value for the medical record (e.g., "UserValue")
+            "comments": comments        // Additional comments for the medical record
         ]
         
         // Add the record to the Firestore database
@@ -347,6 +348,7 @@ class FirestoreGenericHelpers {
             }
         }
     }
+
 
     func fetchMedicalRecordsForPatient(completion: @escaping (Result<[MedicalRecord], Error>) -> Void) {
         // Create a DateFormatter to format the timestamp as a string
@@ -384,13 +386,17 @@ class FirestoreGenericHelpers {
                         // Convert the timestamp to a string using the DateFormatter
                         let timestampString = dateFormatter.string(from: timestamp.dateValue())
                         
+                        // Fetch comments if they exist, or set to an empty string
+                        let comments = data["comments"] as? String ?? ""
+                        
                         // Create a MedicalRecord object with the timestamp as a string
                         let record = MedicalRecord(
                             enteredBy: enteredBy,
                             patientId: patientId,
                             recordType: recordType,
                             timestamp: timestampString, // Use the formatted string
-                            value: value
+                            value: value,
+                            comments: comments // Include comments
                         )
                         medicalRecords.append(record)
                     }
@@ -400,6 +406,7 @@ class FirestoreGenericHelpers {
                 completion(.success(medicalRecords))
             }
     }
+
     
     func fetchCurrentHopsPatientsDetails(completion: @escaping (Result<[(name: String, email: String, profileImage: String, uid: String, linkedHospitals: [String])], Error>) -> Void) {
         // Get the current hospital username from UserDefaults

@@ -49,6 +49,7 @@ class HospitalHSController: UIViewController {
             target: self,
             action: #selector(onLogoutButtonTapped)
         )
+        logoutButton.tintColor = .red 
         navigationItem.rightBarButtonItem = logoutButton
     }
 

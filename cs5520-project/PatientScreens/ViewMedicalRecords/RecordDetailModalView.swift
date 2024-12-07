@@ -17,6 +17,7 @@ class RecordDetailModalView: UIView {
     let recordTypeLabel = UILabel()
     let timestampLabel = UILabel()
     let valueLabel = UILabel()
+    let commentsLabel = UILabel() // New label for comments
     let closeButton = UIButton(type: .system)
     
     // Initialization
@@ -46,7 +47,7 @@ class RecordDetailModalView: UIView {
         addSubview(titleLabel)
         
         // Configure Details Labels
-        let labels = [enteredByLabel, patientIdLabel, recordTypeLabel, timestampLabel, valueLabel]
+        let labels = [enteredByLabel, patientIdLabel, recordTypeLabel, timestampLabel, valueLabel, commentsLabel]
         labels.forEach {
             $0.font = UIFont.systemFont(ofSize: 16)
             $0.textColor = .darkGray
@@ -54,6 +55,11 @@ class RecordDetailModalView: UIView {
             $0.translatesAutoresizingMaskIntoConstraints = false
             addSubview($0)
         }
+        
+        // Configure Comments Label
+        commentsLabel.textColor = .darkGray
+        commentsLabel.numberOfLines = 0 // Allow multiline for comments
+        commentsLabel.translatesAutoresizingMaskIntoConstraints = false
         
         // Close Button
         closeButton.setTitle("Close", for: .normal)
@@ -100,8 +106,13 @@ class RecordDetailModalView: UIView {
             valueLabel.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 20),
             valueLabel.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -20),
             
+            // Comments Label Constraints
+            commentsLabel.topAnchor.constraint(equalTo: valueLabel.bottomAnchor, constant: 12),
+            commentsLabel.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 20),
+            commentsLabel.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -20),
+            
             // Close Button Constraints
-            closeButton.topAnchor.constraint(equalTo: valueLabel.bottomAnchor, constant: 20),
+            closeButton.topAnchor.constraint(equalTo: commentsLabel.bottomAnchor, constant: 20),
             closeButton.centerXAnchor.constraint(equalTo: centerXAnchor),
             closeButton.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -20),
             closeButton.widthAnchor.constraint(equalToConstant: 120),
@@ -120,5 +131,6 @@ class RecordDetailModalView: UIView {
         recordTypeLabel.text = "Record Type: \(record.recordType)"
         timestampLabel.text = "Added on: \(record.timestamp)"
         valueLabel.text = "Stored Value: \(record.value)"
+        commentsLabel.text = "Comments: \(record.comments)" // Display comments
     }
 }

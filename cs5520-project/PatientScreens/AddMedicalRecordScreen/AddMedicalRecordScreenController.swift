@@ -67,8 +67,10 @@ class AddMedicalRecordScreenController: UIViewController, UIPickerViewDelegate, 
             return
         }
         
+        let comments = addMedicalRecordView.commentsTextField.text?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        
         // Call Firestore method to add the medical record
-        firestoreHelper.addMedicalRecord(recordType: selectedRecordType, value: recordValue, enteredBy: "user") { result in
+        firestoreHelper.addMedicalRecord(recordType: selectedRecordType, value: recordValue, comments: comments, enteredBy: "user") { result in
             switch result {
             case .success():
                 self.showAlert(title: "Success", message: "Medical record saved successfully.") {
@@ -80,6 +82,7 @@ class AddMedicalRecordScreenController: UIViewController, UIPickerViewDelegate, 
             }
         }
     }
+
     
     // Alert Function with completion handler
     private func showAlert(title: String, message: String, completion: (() -> Void)? = nil) {

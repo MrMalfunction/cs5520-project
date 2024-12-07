@@ -31,4 +31,5 @@ struct MedicalRecord {
     let recordType: String
     let timestamp: String
     let value: String
+    let comments: String
 }
