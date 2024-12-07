@@ -225,19 +225,76 @@ class AuthHelper {
         }
         
         // Fetch user data
-        func fetchUserData( completion: @escaping (Result<[UserProfileKey: Any], Error>) -> Void) {
+//        func fetchUserData( completion: @escaping (Result<[UserProfileKey: Any], Error>) -> Void) {
+//        let db = Firestore.firestore()
+//        
+//        // Query the Firestore database for the user based on the provided UID
+//            db.collection("users").document(self.user_id).getDocument { document, error in
+//            if let error = error {
+//                // Handle error (e.g., network issues or Firestore errors)
+//                completion(.failure(error))
+//                return
+//            }
+//            
+//            guard let document = document, document.exists else {
+//                // Handle case where the document does not exist
+//                let notFoundError = NSError(domain: "", code: -1, userInfo: [NSLocalizedDescriptionKey: "User not found."])
+//                completion(.failure(notFoundError))
+//                return
+//            }
+//            
+//            // Parse the document data
+//            var userProfileData = [UserProfileKey: Any]()
+//            
+//            // Map each field from the document to the enum keys
+//            if let email = document.get(UserProfileKey.email.rawValue) as? String {
+//                userProfileData[.email] = email
+//            }
+//            
+//            if let name = document.get(UserProfileKey.name.rawValue) as? String {
+//                userProfileData[.name] = name
+//            }
+//            
+//            if let uid = document.get(UserProfileKey.uid.rawValue) as? String {
+//                userProfileData[.uid] = uid
+//            }
+//            
+//            if let userType = document.get(UserProfileKey.userType.rawValue) as? String {
+//                userProfileData[.userType] = userType
+//            }
+//            
+//            // Optionally, check for linkedHospitals or linkedInsurers as arrays
+//            if let linkedHospitals = document.get(UserProfileKey.linkedHospitals.rawValue) as? [String] {
+//                userProfileData[.linkedHospitals] = linkedHospitals
+//            }
+//            
+//            if let linkedInsurers = document.get(UserProfileKey.linkedInsurers.rawValue) as? [String] {
+//                userProfileData[.linkedInsurers] = linkedInsurers
+//            }
+//                
+//                if let profilePhoto = document.get(UserProfileKey.profileImage.rawValue) as? String {
+//                    userProfileData[.profileImage] = profilePhoto
+//                }
+//            
+//            // Return the data via completion handler
+//            completion(.success(userProfileData))
+//        }
+//    }
+    
+    func fetchUserData(patientId: String? = nil, completion: @escaping (Result<[UserProfileKey: Any], Error>) -> Void) {
         let db = Firestore.firestore()
+        print("Patient id in fetchUserData: \(patientId ?? "")")
+        // Use the provided patientId or fallback to self.user_id
+        let targetUserId = patientId ?? self.user_id
+        print("targetUserId: \(targetUserId)")
         
-        // Query the Firestore database for the user based on the provided UID
-            db.collection("users").document(self.user_id).getDocument { document, error in
+        db.collection("users").document(targetUserId).getDocument { document, error in
             if let error = error {
-                // Handle error (e.g., network issues or Firestore errors)
                 completion(.failure(error))
                 return
             }
             
             guard let document = document, document.exists else {
-                // Handle case where the document does not exist
                 let notFoundError = NSError(domain: "", code: -1, userInfo: [NSLocalizedDescriptionKey: "User not found."])
                 completion(.failure(notFoundError))
                 return
@@ -246,24 +303,15 @@ class AuthHelper {
             // Parse the document data
             var userProfileData = [UserProfileKey: Any]()
             
-            // Map each field from the document to the enum keys
-            if let email = document.get(UserProfileKey.email.rawValue) as? String {
-                userProfileData[.email] = email
-            }
+            // Fetch fields with defaults
+            userProfileData[.email] = document.get(UserProfileKey.email.rawValue) as? String ?? "Not Provided"
+            userProfileData[.name] = document.get(UserProfileKey.name.rawValue) as? String ?? "N/A"
+            userProfileData[.uid] = document.get(UserProfileKey.uid.rawValue) as? String ?? ""
+            userProfileData[.userType] = document.get(UserProfileKey.userType.rawValue) as? String ?? "Unknown"
+            userProfileData[.dob] = document.get(UserProfileKey.dob.rawValue) as? String ?? "N/A"
+            userProfileData[.gender] = document.get(UserProfileKey.gender.rawValue) as? String ?? "Other"
+            userProfileData[.bloodgroup] = document.get(UserProfileKey.bloodgroup.rawValue) as? String ?? "N/A"
             
-            if let name = document.get(UserProfileKey.name.rawValue) as? String {
-                userProfileData[.name] = name
-            }
-            
-            if let uid = document.get(UserProfileKey.uid.rawValue) as? String {
-                userProfileData[.uid] = uid
-            }
-            
-            if let userType = document.get(UserProfileKey.userType.rawValue) as? String {
-                userProfileData[.userType] = userType
-            }
-            
-            // Optionally, check for linkedHospitals or linkedInsurers as arrays
             if let linkedHospitals = document.get(UserProfileKey.linkedHospitals.rawValue) as? [String] {
                 userProfileData[.linkedHospitals] = linkedHospitals
             }
@@ -271,15 +319,17 @@ class AuthHelper {
             if let linkedInsurers = document.get(UserProfileKey.linkedInsurers.rawValue) as? [String] {
                 userProfileData[.linkedInsurers] = linkedInsurers
             }
-                
-                if let profilePhoto = document.get(UserProfileKey.profileImage.rawValue) as? String {
-                    userProfileData[.profileImage] = profilePhoto
-                }
             
-            // Return the data via completion handler
+            if let profilePhoto = document.get(UserProfileKey.profileImage.rawValue) as? String {
+                userProfileData[.profileImage] = profilePhoto
+            }
+            
+            print("User Profile Data: \(userProfileData)")
             completion(.success(userProfileData))
         }
     }
+
+
         
         // Update user data
         func updateUserData(data: [String: Any], completion: @escaping (Result<Void, Error>) -> Void) {

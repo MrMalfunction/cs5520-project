@@ -8,6 +8,20 @@ class UserProfileView: UIView, UIPickerViewDataSource, UIPickerViewDelegate {
     let userIdField = UITextField()
     let fullNameField = UITextField()
     let emailField = UITextField()
+    
+    let dobPicker = UIDatePicker()
+    let genderPicker = UIPickerView()
+    let bloodGroupPicker = UIPickerView()
+    
+    // Data for Pickers
+    let genderOptions = ["M", "F", "-"]
+    let bloodGroupOptions = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"]
+    
+    // Selected Fields
+    var selectedGender: String?
+    var selectedBloodGroup: String?
+    var selectedDOB: Date?
+    
     let currentProviderLabel = UILabel()
     let updateButton = UIButton(type: .system)
     let insuranceProviderCodeField = UITextField()
@@ -77,6 +91,18 @@ class UserProfileView: UIView, UIPickerViewDataSource, UIPickerViewDelegate {
         // Email Field (Disabled)
         setupTextField(emailField, placeholder: "Email Address", isEditable: false, label: emailLabel)
         
+        dobPicker.datePickerMode = .date
+        dobPicker.preferredDatePickerStyle = .wheels
+        dobPicker.translatesAutoresizingMaskIntoConstraints = false
+        dobPicker.addTarget(self, action: #selector(didChangeDOB), for: .valueChanged)
+        addSubview(dobPicker)
+        
+        setupPicker(genderPicker)
+        setupPicker(bloodGroupPicker)
+        
+        addSubview(genderPicker)
+        addSubview(bloodGroupPicker)
+        
         // Current Provider Label
         currentProviderLabel.text = "Current Provider Name"
         currentProviderLabel.textColor = .darkGray
@@ -96,6 +122,12 @@ class UserProfileView: UIView, UIPickerViewDataSource, UIPickerViewDelegate {
         updateButton.layer.cornerRadius = 8
         updateButton.translatesAutoresizingMaskIntoConstraints = false
         addSubview(updateButton)
+    }
+    
+    private func setupPicker(_ picker: UIPickerView) {
+        picker.dataSource = self
+        picker.delegate = self
+        picker.translatesAutoresizingMaskIntoConstraints = false
     }
     
     private func setupTextField(_ textField: UITextField, placeholder: String, isEditable: Bool = true, label: UILabel) {
@@ -159,17 +191,41 @@ class UserProfileView: UIView, UIPickerViewDataSource, UIPickerViewDelegate {
     }
     
     func pickerView(_ pickerView: UIPickerView, numberOfRowsInComponent component: Int) -> Int {
-        return insuranceProviders.count
+        
+        switch pickerView {
+        case genderPicker: return genderOptions.count
+        case bloodGroupPicker: return bloodGroupOptions.count
+        case insuranceProviderPicker: return insuranceProviders.count
+        default: return 0
+        }
     }
     
     // MARK: - Picker View Delegate
     func pickerView(_ pickerView: UIPickerView, titleForRow row: Int, forComponent component: Int) -> String? {
-        return insuranceProviders[row]
+        switch pickerView {
+         case genderPicker: return genderOptions[row]
+         case bloodGroupPicker: return bloodGroupOptions[row]
+         case insuranceProviderPicker: return insuranceProviders[row]
+         default: return nil
+         }
     }
     
     func pickerView(_ pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int) {
-        selectedProvider = insuranceProviders[row]
-        insuranceProviderCodeField.resignFirstResponder()
+        switch pickerView {
+        case genderPicker:
+            selectedGender = genderOptions[row]
+        case bloodGroupPicker:
+            selectedBloodGroup = bloodGroupOptions[row]
+        case insuranceProviderPicker:
+            selectedProvider = insuranceProviders[row]
+            insuranceProviderCodeField.resignFirstResponder()
+        default:
+            break
+        }
+    }
+    
+    @objc private func didChangeDOB() {
+        selectedDOB = dobPicker.date
     }
     
     // MARK: - Setup Constraints
@@ -210,7 +266,23 @@ class UserProfileView: UIView, UIPickerViewDataSource, UIPickerViewDelegate {
             emailField.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -20),
             emailField.heightAnchor.constraint(equalToConstant: 50),
             
-            currentProviderLabel.topAnchor.constraint(equalTo: emailField.bottomAnchor, constant: 20),
+            dobPicker.topAnchor.constraint(equalTo: emailField.bottomAnchor, constant: 5),
+            dobPicker.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 5),
+            dobPicker.heightAnchor.constraint(equalToConstant: 90),
+            dobPicker.widthAnchor.constraint(equalToConstant: 180),
+            
+            genderPicker.topAnchor.constraint(equalTo: emailField.bottomAnchor, constant: 5),
+            genderPicker.leadingAnchor.constraint(equalTo: dobPicker.trailingAnchor, constant: -15),
+            genderPicker.heightAnchor.constraint(equalToConstant: 90),
+            genderPicker.widthAnchor.constraint(equalToConstant: 60),
+            
+            bloodGroupPicker.topAnchor.constraint(equalTo: emailField.bottomAnchor, constant: 5),
+            bloodGroupPicker.leadingAnchor.constraint(equalTo: genderPicker.trailingAnchor, constant: -15),
+            bloodGroupPicker.widthAnchor.constraint(equalToConstant: 90),
+            bloodGroupPicker.heightAnchor.constraint(equalToConstant: 90),
+            bloodGroupPicker.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -5),
+            
+            currentProviderLabel.topAnchor.constraint(equalTo: bloodGroupPicker.bottomAnchor, constant: 20),
             currentProviderLabel.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 20),
             currentProviderLabel.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -20),
             

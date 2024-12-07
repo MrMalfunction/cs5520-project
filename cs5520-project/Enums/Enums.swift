@@ -10,6 +10,9 @@ enum UserProfileKey: String {
     case linkedHospitals
     case linkedInsurers
     case name
+    case dob
+    case gender
+    case bloodgroup
     case profileImage
     case uid
     case userType
@@ -17,7 +20,7 @@ enum UserProfileKey: String {
     // Define associated value types
     var valueType: Any.Type {
         switch self {
-        case .email, .name, .profileImage, .uid, .userType:
+        case .email, .name, .profileImage, .uid, .userType, .bloodgroup, .dob, .gender:
             return String.self
         case .linkedHospitals, .linkedInsurers:
             return [String].self
@@ -32,4 +35,12 @@ struct MedicalRecord {
     let timestamp: String
     let value: String
     let comments: String
+}
+
+
+struct ApprovalRequest {
+    let patient: String
+    let hospital: String
+    let comment: String
+    var status: String
 }

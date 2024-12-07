@@ -15,6 +15,7 @@ class FirestoreGenericHelpers {
     private let medicalRecordsDB: CollectionReference    
     private let hospitalRecords: CollectionReference
     private let insurersRecords: CollectionReference
+    private let approveRequest: CollectionReference
     
     init() {
         self.user_id = UserDefaults.standard.string(forKey: "uid") ?? ""
@@ -23,6 +24,7 @@ class FirestoreGenericHelpers {
         
         self.hospitalRecords = db.collection("hospitalRecords")
         self.insurersRecords = db.collection("insurersRecords")
+        self.approveRequest = db.collection("approveRequest")
     }
     
     func saveProfileImageToFirestore(image: UIImage, completion: @escaping (Error?) -> Void) {
@@ -225,6 +227,7 @@ class FirestoreGenericHelpers {
             }
         }
     }
+    
 
     
     func addHospital(hospitalName: String, completion: @escaping (Result<Void, Error>) -> Void) {
@@ -351,6 +354,78 @@ class FirestoreGenericHelpers {
             }
         }
     }
+    
+    func addApproveRequest(status: String, comments: String, insurerName: String, patientName: String, patientId: String, hospitalName: String, hospitalId: String? = nil, completion: @escaping (Result<Void, Error>) -> Void) {
+        // Get the current timestamp
+        let timestamp = Timestamp(date: Date())
+        
+
+
+        // Prepare the data to be saved
+        let recordData: [String: Any] = [
+            "Status": status,
+            "comments": comments,
+            "insurerName": insurerName,
+            "PatientName": patientName,
+            "patientId": patientId,
+            "Date": timestamp,
+            "hospitalName": hospitalName,
+            "hospitalId": hospitalId
+        ]
+        
+        // Add the record to the Firestore database
+        approveRequest.addDocument(data: recordData) { error in
+            if let error = error {
+                completion(.failure(error))  // Handle any errors that occur during the save
+            } else {
+                completion(.success(()))     // Success - record saved
+            }
+        }
+    }
+    
+    func fetchApproveRequests(insurerName: String, patientId: String, completion: @escaping (Result<[QueryDocumentSnapshot], Error>) -> Void) {
+        // Perform a Firestore query where insurerName and patientId match the provided values
+        approveRequest.whereField("insurerName", isEqualTo: insurerName)
+            .whereField("patientId", isEqualTo: patientId)
+            .getDocuments { querySnapshot, error in
+                if let error = error {
+                    // Pass the error to the completion handler
+                    completion(.failure(error))
+                } else if let querySnapshot = querySnapshot {
+                    // Pass the documents to the completion handler
+                    completion(.success(querySnapshot.documents))
+                }
+            }
+    }
+    func fetchApproveRequestsHospital(hospitalName: String, patientId: String, completion: @escaping (Result<[QueryDocumentSnapshot], Error>) -> Void) {
+        // Perform a Firestore query where insurerName and patientId match the provided values
+        approveRequest.whereField("hospitalName", isEqualTo: hospitalName)
+            .whereField("patientId", isEqualTo: patientId)
+            .getDocuments { querySnapshot, error in
+                if let error = error {
+                    // Pass the error to the completion handler
+                    completion(.failure(error))
+                } else if let querySnapshot = querySnapshot {
+                    // Pass the documents to the completion handler
+                    completion(.success(querySnapshot.documents))
+                }
+            }
+    }
+    
+    func fetchApproveRequestsPatient(patientId: String, completion: @escaping (Result<[QueryDocumentSnapshot], Error>) -> Void) {
+        // Perform a Firestore query where insurerName and patientId match the provided values
+        approveRequest.whereField("patientId", isEqualTo: patientId)
+            .getDocuments { querySnapshot, error in
+                if let error = error {
+                    // Pass the error to the completion handler
+                    completion(.failure(error))
+                } else if let querySnapshot = querySnapshot {
+                    // Pass the documents to the completion handler
+                    completion(.success(querySnapshot.documents))
+                }
+            }
+    }
+
 
 
 
@@ -395,7 +470,7 @@ class FirestoreGenericHelpers {
                         
                         // Fetch comments if they exist, or set to an empty string
                         let comments = data["comments"] as? String ?? ""
-                        print("tiemstamap is \(timestampString)")
+                        //print("tiemstamap is \(timestampString)")
                         
                         // Create a MedicalRecord object with the timestamp as a string
                         let record = MedicalRecord(
@@ -408,6 +483,14 @@ class FirestoreGenericHelpers {
                         )
                         medicalRecords.append(record)
                     }
+                }
+                
+                medicalRecords.sort { record1, record2 in
+                    guard let date1 = dateFormatter.date(from: record1.timestamp),
+                          let date2 = dateFormatter.date(from: record2.timestamp) else {
+                        return false // Fallback to maintaining the order if dates are invalid
+                    }
+                    return date1 > date2 // Latest date first
                 }
                 
                 // Return the fetched records
@@ -539,6 +622,36 @@ class FirestoreGenericHelpers {
         }
     }
 
+
+    
+    func updateRequestStatusInFirestore(patientName: String, hospitalName: String, comments: String, newStatus: String, completion: @escaping (Result<Void, Error>) -> Void) {
+        // Perform a Firestore query to find the document that matches the given fields
+        approveRequest.whereField("PatientName", isEqualTo: patientName)
+            .whereField("hospitalName", isEqualTo: hospitalName)
+            .whereField("comments", isEqualTo: comments)
+            .getDocuments { querySnapshot, error in
+                if let error = error {
+                    // Pass the error to the completion handler
+                    completion(.failure(error))
+                } else if let querySnapshot = querySnapshot, !querySnapshot.isEmpty {
+                    // Assuming there's only one matching document (handle multiple matches if needed)
+                    if let document = querySnapshot.documents.first {
+                        // Update the status field of the document
+                        document.reference.updateData(["Status": newStatus]) { updateError in
+                            if let updateError = updateError {
+                                completion(.failure(updateError)) // Pass update error
+                            } else {
+                                completion(.success(())) // Update was successful
+                            }
+                        }
+                    } else {
+                        completion(.failure(NSError(domain: "", code: 404, userInfo: [NSLocalizedDescriptionKey: "No matching document found"])))
+                    }
+                } else {
+                    completion(.failure(NSError(domain: "", code: 404, userInfo: [NSLocalizedDescriptionKey: "No matching document found"])))
+                }
+            }
+    }
 
 
 

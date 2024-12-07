@@ -80,6 +80,7 @@ class SignupViewController: UIViewController {
                             switch result {
                             case .success():
                                 // On success, pop to the root view controller
+                                self?.showAlert(message: "Hospital User registered successfully.")
                                 DispatchQueue.main.async {
                                     self?.navigationController?.popToRootViewController(animated: true)
                                 }
@@ -96,6 +97,7 @@ class SignupViewController: UIViewController {
                         self?.authHelper.registerNewInsurance(name: name) { result in
                             switch result {
                             case .success():
+                                self?.showAlert(message: "Insurance Company User registered successfully.")
                                 // On success, pop to the root view controller
                                 DispatchQueue.main.async {
                                     self?.navigationController?.popToRootViewController(animated: true)

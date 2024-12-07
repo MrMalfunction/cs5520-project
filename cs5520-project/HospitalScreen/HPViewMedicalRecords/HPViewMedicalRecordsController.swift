@@ -6,6 +6,7 @@ class HPViewMedicalRecordsController: UIViewController, UITableViewDelegate, UIT
     var medicalRecords: [MedicalRecord] = []
     var patientId: String?
     var patientName: String? // The patient name to be passed
+    var insurerName: String?
     let hospitalName = UserDefaults.standard.string(forKey: "username")
 
     // View
@@ -41,12 +42,26 @@ class HPViewMedicalRecordsController: UIViewController, UITableViewDelegate, UIT
     private func setupActions() {
         hpviewMedicalRecordsView.addRecordButton.addTarget(self, action: #selector(onAddRecordTapped), for: .touchUpInside)
         hpviewMedicalRecordsView.requestApprovalButton.addTarget(self, action: #selector(onRequestApprovalTapped), for: .touchUpInside)
+        hpviewMedicalRecordsView.showPatientDetailsButton.addTarget(self, action: #selector(onSPDTapped), for: .touchUpInside)
+        hpviewMedicalRecordsView.viewPreviousRequestsButton.addTarget(self, action: #selector(onVPRTapped), for: .touchUpInside)
     }
     
     @objc private func onAddRecordTapped() {
         let addRecordVC = HPAddRecordScreenController()
         addRecordVC.patientId = patientId
         navigationController?.pushViewController(addRecordVC, animated: true)
+    }
+    
+    @objc private func onSPDTapped() {
+        let patientProfileDetailsVC = PatientProfileDetailsController()
+        patientProfileDetailsVC.patientId = patientId
+        navigationController?.pushViewController(patientProfileDetailsVC, animated: true)
+    }
+    
+    @objc private func onVPRTapped() {
+        let hViewInsurerApprovalController = HViewInsurerApprovalController()
+        hViewInsurerApprovalController.patientId = patientId
+        navigationController?.pushViewController(hViewInsurerApprovalController, animated: true)
     }
 
     // TableView DataSource Methods
@@ -105,7 +120,8 @@ class HPViewMedicalRecordsController: UIViewController, UITableViewDelegate, UIT
         alertController.addAction(UIAlertAction(title: "OK", style: .default) { _ in
             let comments = alertController.textFields?.first?.text
             // Handle the OK action (send approval request)
-            print("Approval request sent with comments: \(comments ?? "")")
+            self.saveApproveTapped(comments: comments ?? "")
+            
         })
 
         // Add Cancel button
@@ -113,6 +129,8 @@ class HPViewMedicalRecordsController: UIViewController, UITableViewDelegate, UIT
 
         present(alertController, animated: true, completion: nil)
     }
+    
+  
 
     // MARK: - Utility Methods
     private func showAlert(title: String, message: String) {
@@ -157,5 +175,35 @@ class HPViewMedicalRecordsController: UIViewController, UITableViewDelegate, UIT
         modalView.frame = CGRect(x: 0, y: 0, width: 300, height: 400)
         modalView.center = view.center
         view.addSubview(modalView)
+    }
+    
+    
+    @objc private func saveApproveTapped(comments: String) {
+        let currentHospitalUsername = UserDefaults.standard.string(forKey: "username") ?? "Unknown"
+        let currentHospitalId = UserDefaults.standard.string(forKey: "hospitalId") ?? "Unknown"
+
+        guard let patientId = patientId else {
+            showAlert(title: "Error", message: "Patient ID is missing.")
+            return
+        }
+
+        firestoreHelper.addApproveRequest(
+            status: "Pending", // Assuming you want to set an initial status
+            comments: comments,
+            insurerName: insurerName ?? "",
+            patientName: patientName ?? "",
+            patientId: patientId,
+            hospitalName: currentHospitalUsername,
+            hospitalId: currentHospitalId
+        ) { result in
+            switch result {
+            case .success():
+                self.showAlert(title: "Success", message: "Approval request sent.")
+                self.navigationController?.popViewController(animated: true)
+                
+            case .failure(let error):
+                self.showAlert(title: "Error", message: "Failed to save medical record: \(error.localizedDescription)")
+            }
+        }
     }
 }

@@ -13,6 +13,8 @@ class HPViewMedicalRecordsView: UIView {
     let tableView = UITableView()
     let addRecordButton = UIButton(type: .system) // Add Medical Record Button
     let requestApprovalButton = UIButton(type: .system) // Request Insurer Approval Button
+    let showPatientDetailsButton = UIButton(type: .system)
+    let viewPreviousRequestsButton = UIButton(type: .system)
 
     // MARK: - Initializer
     override init(frame: CGRect) {
@@ -46,6 +48,20 @@ class HPViewMedicalRecordsView: UIView {
         requestApprovalButton.layer.cornerRadius = 8
         requestApprovalButton.translatesAutoresizingMaskIntoConstraints = false
         addSubview(requestApprovalButton)
+        
+        showPatientDetailsButton.setTitle("Patient's Details", for: .normal)
+        showPatientDetailsButton.setTitleColor(.white, for: .normal)
+        showPatientDetailsButton.backgroundColor = .systemBlue
+        showPatientDetailsButton.layer.cornerRadius = 8
+        showPatientDetailsButton.translatesAutoresizingMaskIntoConstraints = false
+        addSubview(showPatientDetailsButton)
+        
+        viewPreviousRequestsButton.setTitle("Show Previous Requests", for: .normal)
+        viewPreviousRequestsButton.setTitleColor(.white, for: .normal)
+        viewPreviousRequestsButton.backgroundColor = .systemGreen
+        viewPreviousRequestsButton.layer.cornerRadius = 8
+        viewPreviousRequestsButton.translatesAutoresizingMaskIntoConstraints = false
+        addSubview(viewPreviousRequestsButton)
 
         // Configure the TableView
         tableView.register(HPRecordTableViewCell.self, forCellReuseIdentifier: "HPMedicalRecordCell")
@@ -59,20 +75,33 @@ class HPViewMedicalRecordsView: UIView {
             // Add Record Button
             addRecordButton.topAnchor.constraint(equalTo: safeAreaLayoutGuide.topAnchor, constant: 16),
             addRecordButton.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 16),
-            addRecordButton.trailingAnchor.constraint(equalTo: centerXAnchor, constant: -8),
+            addRecordButton.trailingAnchor.constraint(equalTo: centerXAnchor, constant: -16), // Shorten the width by increasing spacing
+
             addRecordButton.heightAnchor.constraint(equalToConstant: 44),
 
             // Request Approval Button
             requestApprovalButton.topAnchor.constraint(equalTo: safeAreaLayoutGuide.topAnchor, constant: 16),
-            requestApprovalButton.leadingAnchor.constraint(equalTo: centerXAnchor, constant: 8),
-            requestApprovalButton.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -16),
+            requestApprovalButton.leadingAnchor.constraint(equalTo: centerXAnchor, constant: 1), // Narrow spacing to widen the button
+            requestApprovalButton.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -8), // Increase width by reducing trailing spacing
             requestApprovalButton.heightAnchor.constraint(equalToConstant: 44),
+            
+            showPatientDetailsButton.topAnchor.constraint(equalTo: requestApprovalButton.topAnchor, constant: 54),
+            showPatientDetailsButton.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 16),
+            showPatientDetailsButton.trailingAnchor.constraint(equalTo: centerXAnchor, constant: -16), // Shorten the width by increasing spacing
+            showPatientDetailsButton.heightAnchor.constraint(equalToConstant: 44),
+
+            // Request Approval Button
+            viewPreviousRequestsButton.topAnchor.constraint(equalTo: requestApprovalButton.topAnchor, constant: 54),
+            viewPreviousRequestsButton.leadingAnchor.constraint(equalTo: centerXAnchor, constant: 1), // Narrow spacing to widen the button
+            viewPreviousRequestsButton.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -8), // Increase width by reducing trailing spacing
+            viewPreviousRequestsButton.heightAnchor.constraint(equalToConstant: 44),
 
             // TableView
-            tableView.topAnchor.constraint(equalTo: addRecordButton.bottomAnchor, constant: 16),
+            tableView.topAnchor.constraint(equalTo: viewPreviousRequestsButton.bottomAnchor, constant: 16),
             tableView.leadingAnchor.constraint(equalTo: leadingAnchor),
             tableView.trailingAnchor.constraint(equalTo: trailingAnchor),
             tableView.bottomAnchor.constraint(equalTo: bottomAnchor)
         ])
     }
+
 }

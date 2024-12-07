@@ -31,7 +31,7 @@ class InsuranceHSController: UIViewController {
     }
 
     private func setupNavigationBar() {
-        title = "Insurance Patients" // Main title in navigation bar
+        //title = "Insurance Patients" // Main title in navigation bar
 
         // Profile Button (Left)
         let profileButton = UIBarButtonItem(
@@ -149,22 +149,15 @@ extension InsuranceHSController: UITableViewDelegate {
         let patient = filteredPatients[indexPath.row]
 
         // Example navigation logic (to be implemented as needed)
-        let patientDetailsVC = UIViewController()
-        patientDetailsVC.title = patient.name
-        patientDetailsVC.view.backgroundColor = .white
+        let patientDetailsVC = IPViewMedicalRecordsController()
 
-        let detailsLabel = UILabel()
-        detailsLabel.text = "Email: \(patient.email)\nUID: \(patient.uid)"
-        detailsLabel.textAlignment = .center
-        detailsLabel.numberOfLines = 0
-        detailsLabel.translatesAutoresizingMaskIntoConstraints = false
-
-        patientDetailsVC.view.addSubview(detailsLabel)
-        NSLayoutConstraint.activate([
-            detailsLabel.centerXAnchor.constraint(equalTo: patientDetailsVC.view.centerXAnchor),
-            detailsLabel.centerYAnchor.constraint(equalTo: patientDetailsVC.view.centerYAnchor)
-        ])
-
+        
+        // Pass the patient UID to the new controller
+        patientDetailsVC.patientId = patient.uid
+        patientDetailsVC.patientName = patient.name
+        print("------------------pid in HS---------------------\(patientDetailsVC.patientId)")
+        
+        // Push the new controller onto the navigation stack
         navigationController?.pushViewController(patientDetailsVC, animated: true)
     }
 }

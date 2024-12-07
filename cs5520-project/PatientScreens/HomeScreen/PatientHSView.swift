@@ -8,6 +8,7 @@ class PatientHSView: UIView {
     let viewMedicalRecordButton = UIButton(type: .system)
     let provideAccessButton = UIButton(type: .system)
     let reviewAccessButton = UIButton(type: .system)
+    let viewInsurersApprovalButton = UIButton(type: .system)
     
     // ScrollView and ContentView
     private let scrollView = UIScrollView()
@@ -47,6 +48,7 @@ class PatientHSView: UIView {
         setupButton(button: viewMedicalRecordButton, title: "See Medical Records")
         setupButton(button: provideAccessButton, title: "Provide Hospital Access")
         setupButton(button: reviewAccessButton, title: "Review Hospital Access")
+        setupButton(button: viewInsurersApprovalButton, title: "View Insurer's Approval")
     }
 
     private func setupButton(button: UIButton, title: String) {
@@ -85,6 +87,7 @@ class PatientHSView: UIView {
         viewMedicalRecordButton.translatesAutoresizingMaskIntoConstraints = false
         provideAccessButton.translatesAutoresizingMaskIntoConstraints = false
         reviewAccessButton.translatesAutoresizingMaskIntoConstraints = false
+        viewInsurersApprovalButton.translatesAutoresizingMaskIntoConstraints = false
 
         NSLayoutConstraint.activate([
             // Title Label
@@ -115,7 +118,14 @@ class PatientHSView: UIView {
             reviewAccessButton.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 20),
             reviewAccessButton.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -20),
             reviewAccessButton.heightAnchor.constraint(equalToConstant: 60),
-            reviewAccessButton.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -20)
+           
+            
+            viewInsurersApprovalButton.topAnchor.constraint(equalTo: reviewAccessButton.bottomAnchor, constant: 20),
+            viewInsurersApprovalButton.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 20),
+            viewInsurersApprovalButton.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -20),
+            viewInsurersApprovalButton.heightAnchor.constraint(equalToConstant: 60),
+            viewInsurersApprovalButton.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -20),
+
         ])
     }
 }

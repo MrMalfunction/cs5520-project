@@ -34,6 +34,9 @@ class PatientHSController: UIViewController {
         customView.viewMedicalRecordButton.addTarget(self, action: #selector(onViewMedicalRecordTapped), for: .touchUpInside)
         customView.provideAccessButton.addTarget(self, action: #selector(onProvideAccessTapped), for: .touchUpInside)
         customView.reviewAccessButton.addTarget(self, action: #selector(onReviewAccessTapped), for: .touchUpInside)
+        //customView.reviewAccessButton.addTarget(self, action: #selector(onReviewAccessTapped), for: .touchUpInside)
+        customView.viewInsurersApprovalButton.addTarget(self, action: #selector(onViewInsurersApprovalTapped), for: .touchUpInside)
+
     }
 
     private func setupNavigationBar() {
@@ -53,6 +56,12 @@ class PatientHSController: UIViewController {
         // Navigate to the Add Medical Record screen
         let addMedicalRecordController = AddMedicalRecordScreenController()
         navigationController?.pushViewController(addMedicalRecordController, animated: true)
+    }
+    
+    @objc private func onViewInsurersApprovalTapped() {
+        // Navigate to the Add Medical Record screen
+        let viewInsurerApprovalController = ViewInsurerApprovalController()
+        navigationController?.pushViewController(viewInsurerApprovalController, animated: true)
     }
     
     @objc private func onViewMedicalRecordTapped() {

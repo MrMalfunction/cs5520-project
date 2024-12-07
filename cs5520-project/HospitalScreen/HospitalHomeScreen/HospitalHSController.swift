@@ -154,6 +154,7 @@ extension HospitalHSController: UITableViewDelegate {
         // Pass the patient UID to the new controller
         hsmedicalRecordsVC.patientId = patient.uid
         hsmedicalRecordsVC.patientName = patient.name
+        hsmedicalRecordsVC.insurerName = patient.linkedHospitals[0]
         print("------------------pid in HS---------------------\(hsmedicalRecordsVC.patientId)")
         
         // Push the new controller onto the navigation stack
