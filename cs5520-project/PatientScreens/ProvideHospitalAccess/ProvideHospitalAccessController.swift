@@ -91,6 +91,7 @@ class ProvideHospitalAccessController: UIViewController {
                     
                     // Show success alert
                     self.showAlert(message: "Successfully added access for \(hospital).")
+                    self.provideHospitalAccessView.tableView.reloadData()
                 case .failure(let error):
                     // Show failure alert
                     self.showAlert(message: "Failed to add access for \(hospital): \(error.localizedDescription)")

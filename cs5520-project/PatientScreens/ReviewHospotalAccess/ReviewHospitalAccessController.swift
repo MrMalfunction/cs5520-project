@@ -49,6 +49,7 @@ class ReviewHospitalAccessController: UIViewController {
                 case .success:
                     self?.items.remove(at: indexPath.row)
                     self?.provideHospitalAccessView.tableView.deleteRows(at: [indexPath], with: .automatic)
+                    self?.provideHospitalAccessView.tableView.reloadData()
                 case .failure(let error):
                     self?.showAlert(message: "Failed to remove hospital: \(error.localizedDescription)")
                 }
