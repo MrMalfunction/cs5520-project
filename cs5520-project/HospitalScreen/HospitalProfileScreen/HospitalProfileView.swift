@@ -1,9 +1,11 @@
-
 import UIKit
 
 class HospitalProfileView: UIView {
 
     // MARK: - UI Components
+    let scrollView = UIScrollView()
+    let contentView = UIView()
+
     let profileImageView = UIImageView()
     let updateImageButton = UIButton(type: .system)
     let userIdField = UITextField()
@@ -35,6 +37,12 @@ class HospitalProfileView: UIView {
     private func setupViews() {
         backgroundColor = .white
 
+        // Configure ScrollView and ContentView
+        scrollView.translatesAutoresizingMaskIntoConstraints = false
+        contentView.translatesAutoresizingMaskIntoConstraints = false
+        addSubview(scrollView)
+        scrollView.addSubview(contentView)
+
         // Profile Image View
         profileImageView.contentMode = .scaleAspectFit
         profileImageView.layer.cornerRadius = 50
@@ -43,27 +51,19 @@ class HospitalProfileView: UIView {
         profileImageView.layer.borderColor = UIColor.lightGray.cgColor
         profileImageView.backgroundColor = .lightGray
         profileImageView.translatesAutoresizingMaskIntoConstraints = false
-        addSubview(profileImageView)
+        contentView.addSubview(profileImageView)
 
         // Update Image Button
         updateImageButton.setTitle("Update Image", for: .normal)
         updateImageButton.setTitleColor(.systemBlue, for: .normal)
         updateImageButton.translatesAutoresizingMaskIntoConstraints = false
-        addSubview(updateImageButton)
+        contentView.addSubview(updateImageButton)
 
-        // User ID Field (Disabled)
+        // Text fields and labels
         setupTextField(userIdField, placeholder: "User ID (Disabled)", isEditable: false, label: userIdLabel)
-
-        // Hospital Name Field
         setupTextField(hospitalNameField, placeholder: "Hospital Name", label: hospitalNameLabel)
-
-        // Email Field (Disabled)
         setupTextField(emailField, placeholder: "Email Address", isEditable: false, label: emailLabel)
-
-        // Address Field
         setupTextField(addressField, placeholder: "Address", label: addressLabel)
-
-        // Contact Info Field
         setupTextField(contactInfoField, placeholder: "Contact No.", label: contactInfoLabel)
 
         // Update Button
@@ -72,7 +72,7 @@ class HospitalProfileView: UIView {
         updateButton.setTitleColor(.white, for: .normal)
         updateButton.layer.cornerRadius = 8
         updateButton.translatesAutoresizingMaskIntoConstraints = false
-        addSubview(updateButton)
+        contentView.addSubview(updateButton)
     }
 
     private func setupTextField(_ textField: UITextField, placeholder: String, isEditable: Bool = true, label: UILabel) {
@@ -85,70 +85,89 @@ class HospitalProfileView: UIView {
         label.font = UIFont.systemFont(ofSize: 12)
         label.textColor = .gray
         label.translatesAutoresizingMaskIntoConstraints = false
-        addSubview(label)
-        addSubview(textField)
+        contentView.addSubview(label)
+        contentView.addSubview(textField)
     }
 
     // MARK: - Setup Constraints
     private func setupConstraints() {
+        // ScrollView Constraints
         NSLayoutConstraint.activate([
-            profileImageView.topAnchor.constraint(equalTo: safeAreaLayoutGuide.topAnchor, constant: 20),
-            profileImageView.centerXAnchor.constraint(equalTo: centerXAnchor),
+            scrollView.topAnchor.constraint(equalTo: safeAreaLayoutGuide.topAnchor),
+            scrollView.leadingAnchor.constraint(equalTo: leadingAnchor),
+            scrollView.trailingAnchor.constraint(equalTo: trailingAnchor),
+            scrollView.bottomAnchor.constraint(equalTo: safeAreaLayoutGuide.bottomAnchor)
+        ])
+
+        // ContentView Constraints
+        NSLayoutConstraint.activate([
+            contentView.topAnchor.constraint(equalTo: scrollView.topAnchor),
+            contentView.leadingAnchor.constraint(equalTo: scrollView.leadingAnchor),
+            contentView.trailingAnchor.constraint(equalTo: scrollView.trailingAnchor),
+            contentView.bottomAnchor.constraint(equalTo: scrollView.bottomAnchor),
+            contentView.widthAnchor.constraint(equalTo: scrollView.widthAnchor)
+        ])
+
+        // Layout for the subviews inside ContentView
+        NSLayoutConstraint.activate([
+            profileImageView.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 20),
+            profileImageView.centerXAnchor.constraint(equalTo: contentView.centerXAnchor),
             profileImageView.widthAnchor.constraint(equalToConstant: 100),
             profileImageView.heightAnchor.constraint(equalToConstant: 100),
 
             updateImageButton.topAnchor.constraint(equalTo: profileImageView.bottomAnchor, constant: 10),
-            updateImageButton.centerXAnchor.constraint(equalTo: centerXAnchor),
+            updateImageButton.centerXAnchor.constraint(equalTo: contentView.centerXAnchor),
 
             userIdLabel.topAnchor.constraint(equalTo: updateImageButton.bottomAnchor, constant: 20),
-            userIdLabel.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 20),
-            userIdLabel.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -20),
+            userIdLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 20),
+            userIdLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -20),
 
             userIdField.topAnchor.constraint(equalTo: userIdLabel.bottomAnchor, constant: 5),
-            userIdField.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 20),
-            userIdField.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -20),
+            userIdField.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 20),
+            userIdField.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -20),
             userIdField.heightAnchor.constraint(equalToConstant: 50),
 
             hospitalNameLabel.topAnchor.constraint(equalTo: userIdField.bottomAnchor, constant: 20),
-            hospitalNameLabel.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 20),
-            hospitalNameLabel.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -20),
+            hospitalNameLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 20),
+            hospitalNameLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -20),
 
             hospitalNameField.topAnchor.constraint(equalTo: hospitalNameLabel.bottomAnchor, constant: 5),
-            hospitalNameField.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 20),
-            hospitalNameField.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -20),
+            hospitalNameField.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 20),
+            hospitalNameField.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -20),
             hospitalNameField.heightAnchor.constraint(equalToConstant: 50),
 
             emailLabel.topAnchor.constraint(equalTo: hospitalNameField.bottomAnchor, constant: 20),
-            emailLabel.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 20),
-            emailLabel.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -20),
+            emailLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 20),
+            emailLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -20),
 
             emailField.topAnchor.constraint(equalTo: emailLabel.bottomAnchor, constant: 5),
-            emailField.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 20),
-            emailField.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -20),
+            emailField.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 20),
+            emailField.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -20),
             emailField.heightAnchor.constraint(equalToConstant: 50),
 
             addressLabel.topAnchor.constraint(equalTo: emailField.bottomAnchor, constant: 20),
-            addressLabel.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 20),
-            addressLabel.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -20),
+            addressLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 20),
+            addressLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -20),
 
             addressField.topAnchor.constraint(equalTo: addressLabel.bottomAnchor, constant: 5),
-            addressField.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 20),
-            addressField.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -20),
+            addressField.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 20),
+            addressField.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -20),
             addressField.heightAnchor.constraint(equalToConstant: 50),
 
             contactInfoLabel.topAnchor.constraint(equalTo: addressField.bottomAnchor, constant: 20),
-            contactInfoLabel.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 20),
-            contactInfoLabel.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -20),
+            contactInfoLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 20),
+            contactInfoLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -20),
 
             contactInfoField.topAnchor.constraint(equalTo: contactInfoLabel.bottomAnchor, constant: 5),
-            contactInfoField.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 20),
-            contactInfoField.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -20),
+            contactInfoField.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 20),
+            contactInfoField.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -20),
             contactInfoField.heightAnchor.constraint(equalToConstant: 50),
 
             updateButton.topAnchor.constraint(equalTo: contactInfoField.bottomAnchor, constant: 20),
-            updateButton.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 20),
-            updateButton.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -20),
-            updateButton.heightAnchor.constraint(equalToConstant: 50)
+            updateButton.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 20),
+            updateButton.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -20),
+            updateButton.heightAnchor.constraint(equalToConstant: 50),
+            updateButton.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -20) // Ensure contentView's bottom constraint
         ])
     }
 }
