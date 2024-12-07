@@ -10,7 +10,6 @@ class UserProfileController: UIViewController, UIImagePickerControllerDelegate, 
     private let firestoreHelper = FirestoreGenericHelpers()
     private let activityIndicator = UIActivityIndicatorView(style: .large)
     private var businessIDs: [String] = [] // Store fetched business IDs
-    
 
     
     override func loadView() {
@@ -61,9 +60,9 @@ class UserProfileController: UIViewController, UIImagePickerControllerDelegate, 
                 case .success(let ids):
                     self?.businessIDs = ids
                     self?.userProfileView.insuranceProviderPicker.reloadAllComponents()
-                    if let firstProvider = self?.businessIDs.first {
-                        self?.userProfileView.currentProviderLabel.text = "Selected Provider: \(firstProvider)"
-                    }
+//                    if let firstProvider = self?.businessIDs.first {
+//                        self?.userProfileView.currentProviderLabel.text = "Selected Provider: \(firstProvider)"
+//                    }
                 case .failure(let error):
                     self?.showAlert(message: "Failed to fetch business IDs: \(error.localizedDescription)")
                 }
@@ -91,7 +90,6 @@ class UserProfileController: UIViewController, UIImagePickerControllerDelegate, 
         if businessIDs.indices.contains(selectedRow) {
             let selectedProvider = businessIDs[selectedRow]
             userProfileView.insuranceProviderCodeField.text = selectedProvider
-            userProfileView.currentProviderLabel.text = "Selected Provider: \(selectedProvider)"
         }
         // Dismiss the picker
         userProfileView.insuranceProviderCodeField.resignFirstResponder()
@@ -113,7 +111,7 @@ class UserProfileController: UIViewController, UIImagePickerControllerDelegate, 
     
     func pickerView(_ pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int) {
         // Update the label or selected provider field
-        userProfileView.currentProviderLabel.text = "Selected Provider: \(businessIDs[row])"
+//        userProfileView.currentProviderLabel.text = "Selected Provider: \(businessIDs[row])"
     }
 
     func showAlert(message: String, completion: (() -> Void)? = nil) {
@@ -262,21 +260,48 @@ class UserProfileController: UIViewController, UIImagePickerControllerDelegate, 
     }
     
     @objc private func onUpdateProfileTapped() {
-        let updatedData: [String: Any] = [
-            "name": userProfileView.fullNameField.text ?? "",
-            "linkedInsurers": [],
-        ]
+        var updatedData: [String: Any]
+        if userProfileView.insuranceProviderCodeField.text?.isEmpty == false {
+            updatedData = [
+                "name": userProfileView.fullNameField.text ?? "",
+            "linkedInsurers": userProfileView.insuranceProviderCodeField.text?.isEmpty == false ?
+            [userProfileView.insuranceProviderCodeField.text!] : []]
+            
+        } else {
+            updatedData = [
+                "name": userProfileView.fullNameField.text ?? ""]
+        }
         
-        self.authHelper.updateUserData(data: updatedData) { [weak self] result in
-            DispatchQueue.main.async {
-                switch result {
-                case .success:
-                    self?.showAlert(message: "Profile updated successfully.")
-                case .failure(let error):
-                    self?.showAlert(message: "Failed to update profile: \(error.localizedDescription)")
+        self.authHelper.updateUserData(data: updatedData) { [self] result in
+            switch result {
+            case .success:
+                // After successfully updating user data, call updateUserInInsurer
+                guard
+                    let newInsurerName = self.userProfileView.insuranceProviderCodeField.text, !newInsurerName.isEmpty,
+                    let currentInsurerName = self.userProfileView.currentProviderLabel.text?.replacingOccurrences(of: "Current Provider: ", with: "")
+                else {
+                    self.showAlert(message: "Profile updated, but insufficient insurer details provided.")
+                    return
                 }
+                print(currentInsurerName)
+
+                // Call updateUserInInsurer with both current and new insurer names
+                self.firestoreHelper.updateUserInInsurer(currentInsName: currentInsurerName, newInsName: newInsurerName) { insurerResult in
+                    switch insurerResult {
+                    case .success:
+                        self.showAlert(message: "Profile and insurer updated successfully.")
+                        if self.userProfileView.insuranceProviderCodeField.text?.isEmpty == false {
+                            self.userProfileView.currentProviderLabel.text = "Current Provider: " + self.userProfileView.insuranceProviderCodeField.text!
+                        }
+                    case .failure(let error):
+                        self.showAlert(message: "Profile updated, but failed to update insurer: \(error.localizedDescription)")
+                    }
+                }
+            case .failure(let error):
+                self.showAlert(message: "Failed to update profile: \(error.localizedDescription)")
             }
         }
+        
     }
 }
 
