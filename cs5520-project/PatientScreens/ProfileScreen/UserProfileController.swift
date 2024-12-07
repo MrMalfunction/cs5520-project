@@ -121,37 +121,6 @@ class UserProfileController: UIViewController, UIImagePickerControllerDelegate, 
         })
         present(alertController, animated: true, completion: nil)
     }
-
-//    private func loadUserData() {
-//        self.authHelper.fetchUserData { [weak self] result in
-//            switch result {
-//            case .success(let userData):
-//                // Safely unwrap and set the values from the userData dictionary
-//                if let userId = userData[.uid] as? String {
-//                    self?.userProfileView.userIdField.text = userId
-//                }
-//                if let fullName = userData[.name] as? String {
-//                    self?.userProfileView.fullNameField.text = fullName
-//                }
-//                if let email = userData[.email] as? String {
-//                    self?.userProfileView.emailField.text = email
-//                }
-//                if let insuranceProviders = userData[.linkedInsurers] as? [String], !insuranceProviders.isEmpty {
-//                    self?.userProfileView.currentProviderLabel.text = "Current Provider: \(insuranceProviders[0])"
-//                } else {
-//                    self?.userProfileView.currentProviderLabel.text = "Current Provider: N/A"
-//                }
-//                
-//                // Decode and display the profile image if available
-//                if let profileImageBase64 = userData[.profileImage] as? String {
-//                    self?.decodeBase64ToImage(base64String: profileImageBase64)
-//                }
-//                
-//            case .failure(let error):
-//                self?.showAlert(message: "Failed to load user data: \(error.localizedDescription)")
-//            }
-//        }
-//    }
     
     private func loadUserData() {
         self.authHelper.fetchUserData { [weak self] result in
@@ -307,51 +276,6 @@ class UserProfileController: UIViewController, UIImagePickerControllerDelegate, 
             }
         }
     }
-    
-//    @objc private func onUpdateProfileTapped() {
-//        var updatedData: [String: Any]
-//        if userProfileView.insuranceProviderCodeField.text?.isEmpty == false {
-//            updatedData = [
-//                "name": userProfileView.fullNameField.text ?? "",
-//            "linkedInsurers": userProfileView.insuranceProviderCodeField.text?.isEmpty == false ?
-//            [userProfileView.insuranceProviderCodeField.text!] : []]
-//            
-//        } else {
-//            updatedData = [
-//                "name": userProfileView.fullNameField.text ?? ""]
-//        }
-//        
-//        self.authHelper.updateUserData(data: updatedData) { [self] result in
-//            switch result {
-//            case .success:
-//                // After successfully updating user data, call updateUserInInsurer
-//                guard
-//                    let newInsurerName = self.userProfileView.insuranceProviderCodeField.text, !newInsurerName.isEmpty,
-//                    let currentInsurerName = self.userProfileView.currentProviderLabel.text?.replacingOccurrences(of: "Current Provider: ", with: "")
-//                else {
-//                    self.showAlert(message: "Profile updated, but insufficient insurer details provided.")
-//                    return
-//                }
-//                print(currentInsurerName)
-//
-//                // Call updateUserInInsurer with both current and new insurer names
-//                self.firestoreHelper.updateUserInInsurer(currentInsName: currentInsurerName, newInsName: newInsurerName) { insurerResult in
-//                    switch insurerResult {
-//                    case .success:
-//                        self.showAlert(message: "Profile and insurer updated successfully.")
-//                        if self.userProfileView.insuranceProviderCodeField.text?.isEmpty == false {
-//                            self.userProfileView.currentProviderLabel.text = "Current Provider: " + self.userProfileView.insuranceProviderCodeField.text!
-//                        }
-//                    case .failure(let error):
-//                        self.showAlert(message: "Profile updated, but failed to update insurer: \(error.localizedDescription)")
-//                    }
-//                }
-//            case .failure(let error):
-//                self.showAlert(message: "Failed to update profile: \(error.localizedDescription)")
-//            }
-//        }
-//        
-//    }
     
     @objc private func onUpdateProfileTapped() {
         var updatedData: [String: Any] = [

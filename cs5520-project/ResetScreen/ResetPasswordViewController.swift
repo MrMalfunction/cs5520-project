@@ -1,9 +1,3 @@
-//
-//  ResetView.swift
-//  cs5520-project
-//
-//  Created by Amol Bohora on 11/23/24.
-//
 
 import UIKit
 

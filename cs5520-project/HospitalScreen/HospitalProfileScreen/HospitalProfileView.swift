@@ -1,9 +1,4 @@
-//
-//  HospitalProfileView.swift
-//  cs5520-project
-//
-//  Created by Sumit Pagar on 12/2/24.
-//
+
 import UIKit
 
 class HospitalProfileView: UIView {

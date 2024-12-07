@@ -1,9 +1,3 @@
-//
-//  AddMedicalRecordScreenController.swift
-//  cs5520-project
-//
-//  Created by Amol Bohora on 12/5/24.
-//
 
 import UIKit
 

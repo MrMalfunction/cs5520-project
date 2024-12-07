@@ -1,9 +1,4 @@
-//
-//  IGrantApprovalControllerViewController.swift
-//  cs5520-project
-//
-//  Created by Sumit Pagar on 12/6/24.
-//
+
 import UIKit
 
 class IGrantApprovalController: UIViewController {

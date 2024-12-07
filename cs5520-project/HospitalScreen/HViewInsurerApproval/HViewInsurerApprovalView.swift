@@ -1,9 +1,3 @@
-//
-//  ViewInsurerApprovalView.swift
-//  cs5520-project
-//
-//  Created by Sumit Pagar on 12/7/24.
-//
 
 import UIKit
 
