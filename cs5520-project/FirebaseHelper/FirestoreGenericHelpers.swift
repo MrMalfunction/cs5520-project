@@ -57,7 +57,7 @@ class FirestoreGenericHelpers {
                 
                 var businessIDs: [String] = []
                 for document in snapshot.documents {
-                    if let businessID = document.data()["businessID"] as? String {
+                    if let businessID = document.data()["name"] as? String {
                         businessIDs.append(businessID)
                     }
                 }
@@ -259,6 +259,67 @@ class FirestoreGenericHelpers {
                     } else {
                         completion(.success(()))
                     }
+                }
+            }
+        }
+    }
+    
+    func updateUserInInsurer(currentInsName: String, newInsName: String, completion: @escaping (Result<Void, Error>) -> Void) {
+        // Step 1: Remove user from the current insurer only if the currentInsName is not "N/A"
+        if currentInsName != "N/A" {
+            self.insurersRecords.whereField("name", isEqualTo: currentInsName).getDocuments { querySnapshot, error in
+                if let error = error {
+                    completion(.failure(error))
+                    return
+                }
+
+                guard let documents = querySnapshot?.documents, !documents.isEmpty else {
+                    print("No insurer found with the name \(currentInsName).")
+                    completion(.failure(NSError(domain: "CurrentInsurerNotFound", code: 404, userInfo: [NSLocalizedDescriptionKey: "No insurer found with the name \(currentInsName)."])))
+                    return
+                }
+
+                let currentInsurerDocument = documents.first
+                currentInsurerDocument?.reference.updateData([
+                    "linkedPatients": FieldValue.arrayRemove([self.user_id])
+                ]) { error in
+                    if let error = error {
+                        completion(.failure(error))
+                        return
+                    }
+
+                    // Proceed to step 2: Add user to the new insurer
+                    self.updateNewInsurer(newInsName: newInsName, completion: completion)
+                }
+            }
+        } else {
+            // If the current insurer is "N/A", skip removal and just update the new insurer
+            self.updateNewInsurer(newInsName: newInsName, completion: completion)
+        }
+    }
+
+    // Helper method to update the new insurer
+    private func updateNewInsurer(newInsName: String, completion: @escaping (Result<Void, Error>) -> Void) {
+        self.insurersRecords.whereField("name", isEqualTo: newInsName).getDocuments { querySnapshot, error in
+            if let error = error {
+                completion(.failure(error))
+                return
+            }
+
+            guard let documents = querySnapshot?.documents, !documents.isEmpty else {
+                print("No insurer found with the name \(newInsName).")
+                completion(.failure(NSError(domain: "NewInsurerNotFound", code: 404, userInfo: [NSLocalizedDescriptionKey: "No insurer found with the name \(newInsName)."])))
+                return
+            }
+
+            let newInsurerDocument = documents.first
+            newInsurerDocument?.reference.updateData([
+                "linkedPatients": FieldValue.arrayUnion([self.user_id])
+            ]) { error in
+                if let error = error {
+                    completion(.failure(error))
+                } else {
+                    completion(.success(()))
                 }
             }
         }
