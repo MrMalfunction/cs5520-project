@@ -1,11 +1,13 @@
 
 import UIKit
+import CoreLocation
+import MapKit
 
 class PatientHSController: UIViewController {
     
     private let customView = PatientHSView() // Custom view for the Home Screen
     private let authHelper = AuthHelper()
-
+    private let firestoreHelpers = FirestoreGenericHelpers()
     override func loadView() {
         // Assign the custom view to the controller's view
         view = customView
@@ -16,6 +18,7 @@ class PatientHSController: UIViewController {
         setupBindings()
         self.navigationItem.hidesBackButton = true
         setupNavigationBar()
+        loadHospitalsOnMap()
         
         let tapRecognizer = UITapGestureRecognizer(target: self, action: #selector(hideKeyboardOnTap))
         tapRecognizer.cancelsTouchesInView = false
@@ -24,6 +27,66 @@ class PatientHSController: UIViewController {
         customView.provideAccessButton.addTarget(self, action: #selector(onProvideAccessTapped), for: .touchUpInside)
 //        customView.userPhotoButton.addTarget(self, action: #selector(onUserPhotoTapped), for: .touchUpInside)
     }
+    
+    func loadHospitalsOnMap() {
+        firestoreHelpers.fetchHospitalsWithAddresses { [weak self] result in
+            guard let self = self else { return }
+            
+            switch result {
+            case .success(let hospitals):
+                // Clear existing annotations
+                customView.mapView.removeAnnotations(customView.mapView.annotations)
+                
+                if hospitals.isEmpty {
+                    print("No hospitals with addresses found.")
+                    return
+                }
+                print ("Found \(hospitals) hospitals with addresses.")
+                // Add hospitals to the map
+                for (hospitalName, address) in hospitals {
+                    self.addAnnotationForAddress(address: address, title: hospitalName)
+                }
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                    let bostonCoordinates = CLLocationCoordinate2D(latitude: 42.3601, longitude: -71.0589)
+                    let region = MKCoordinateRegion(
+                        center: bostonCoordinates,
+                        span: MKCoordinateSpan(latitudeDelta: 0.1, longitudeDelta: 0.1)
+                    )
+                    self.customView.mapView.setRegion(region, animated: true)
+                }
+                
+            case .failure(let error):
+                print("Error fetching hospitals: \(error.localizedDescription)")
+            }
+        }
+    }
+
+    private func addAnnotationForAddress(address: String, title: String) {
+        let geocoder = CLGeocoder()
+        
+        geocoder.geocodeAddressString(address) { [weak self] placemarks, error in
+            guard let self = self else { return }
+            
+            if let error = error {
+                print("Geocoding error for address '\(address)': \(error.localizedDescription)")
+                return
+            }
+            
+            if let placemark = placemarks?.first, let location = placemark.location {
+                let annotation = MKPointAnnotation()
+                annotation.coordinate = location.coordinate
+                annotation.title = title
+                annotation.subtitle = address
+                customView.mapView.addAnnotation(annotation)
+                print("title is \(title)")
+                print("address is \(address)")
+                // Center map on Boston after adding the annotation
+
+            }
+        }
+    }
+
+
 
     
     @objc func hideKeyboardOnTap(){

@@ -104,10 +104,11 @@ class HospitalProfileViewController: UIViewController, UIImagePickerControllerDe
                 switch result {
                 case .success(let hospitalData):
                     // Safely unwrap and set the values from the Firestore document
+                    print("Hospitaldata \(hospitalData)")
                     if let userId = hospitalData["uid"] as? String {
                         self?.hospitalProfileView.userIdField.text = userId
                     }
-                    if let hospitalName = hospitalData["hospitalName"] as? String {
+                    if let hospitalName = hospitalData["name"] as? String {
                         self?.hospitalProfileView.hospitalNameField.text = hospitalName
                     }
                     if let email = hospitalData["email"] as? String {

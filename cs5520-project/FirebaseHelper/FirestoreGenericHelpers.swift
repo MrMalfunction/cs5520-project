@@ -170,6 +170,44 @@ class FirestoreGenericHelpers {
         }
     }
     
+    func fetchHospitalsWithAddresses(completion: @escaping (Result<[String: String], Error>) -> Void) {
+        // Query for all hospitals
+        users_db.whereField("userType", isEqualTo: "Hospital").getDocuments { querySnapshot, error in
+            if let error = error {
+                completion(.failure(error))
+                return
+            }
+            
+            // Ensure the snapshot is valid
+            guard let snapshot = querySnapshot else {
+                completion(.failure(NSError(
+                    domain: "FirestoreError",
+                    code: -1,
+                    userInfo: [NSLocalizedDescriptionKey: "No hospitals found"]
+                )))
+                return
+            }
+            
+            // Prepare the key-value dictionary of hospital names and addresses
+            var hospitalsWithAddresses: [String: String] = [:]
+            
+            for document in snapshot.documents {
+                let data = document.data()
+                if
+                    let hospitalName = data["name"] as? String,
+                    let address = data["address"] as? String,
+                    !address.isEmpty
+                {
+                    hospitalsWithAddresses[hospitalName] = address
+                }
+            }
+            
+            // Return the results
+            completion(.success(hospitalsWithAddresses))
+        }
+    }
+
+    
 
     
     func addHospital(hospitalName: String, completion: @escaping (Result<Void, Error>) -> Void) {
