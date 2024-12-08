@@ -65,12 +65,26 @@ class AddMedicalRecordScreenController: UIViewController, UIPickerViewDelegate, 
             return
         }
         
-        guard let recordValue = addMedicalRecordView.recordValueTextField.text, !recordValue.isEmpty else {
+        guard var recordValue = addMedicalRecordView.recordValueTextField.text, !recordValue.isEmpty else {
             showAlert(title: "Error", message: "Please enter a report value.")
             return
         }
         
         let comments = addMedicalRecordView.commentsTextField.text?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        
+        switch selectedRecordType {
+        case "Blood Glucose Level":
+            recordValue += " mg/dL"
+            
+        case "Blood Cholesterol Level":
+            recordValue += " mg/dL"
+            
+        case "Blood Pressure":
+            recordValue += " mmHg"
+            
+        default:
+            break
+        }
         
         // Call Firestore method to add the medical record
         firestoreHelper.addMedicalRecord(recordType: selectedRecordType, value: recordValue, comments: comments, enteredBy: "user") { result in

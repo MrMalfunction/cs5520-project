@@ -65,7 +65,7 @@ class HPAddRecordScreenController: UIViewController, UIPickerViewDelegate, UIPic
              return
          }
 
-         guard let recordValue = hpaddRecordView.recordValueTextField.text, !recordValue.isEmpty else {
+         guard var recordValue = hpaddRecordView.recordValueTextField.text, !recordValue.isEmpty else {
              showAlert(title: "Error", message: "Please enter a report value.")
              return
          }
@@ -78,6 +78,20 @@ class HPAddRecordScreenController: UIViewController, UIPickerViewDelegate, UIPic
              showAlert(title: "Error", message: "Patient ID is missing.")
              return
          }
+        
+        switch selectedRecordType {
+        case "Blood Glucose Level":
+            recordValue += " mg/dL"
+            
+        case "Blood Cholesterol Level":
+            recordValue += " mg/dL"
+            
+        case "Blood Pressure":
+            recordValue += " mmHg"
+            
+        default:
+            break
+        }
 
          // Call Firestore method to add the medical record
          firestoreHelper.addMedicalRecord(
